@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f7f8fc">
+<title>Formwheel_Piano</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f7f8fc;color:#171923}
+button,input,select{font:inherit}
+button{cursor:pointer;border:0}
+.header{position:sticky;top:0;z-index:20;height:68px;padding:0 22px;display:flex;align-items:center;background:rgba(255,255,255,.9);backdrop-filter:blur(14px);border-bottom:1px solid #e6e8ee}
+.logo{font-size:23px;font-weight:900;letter-spacing:-1px;cursor:pointer}
+.logo .wheel{display:inline-flex;width:25px;height:25px;border:5px solid #7c3aed;border-radius:50%;vertical-align:-5px;margin:0 4px;position:relative}
+.logo .wheel:after{content:"";position:absolute;inset:5px;background:#7c3aed;border-radius:50%}
+.wrap{max-width:1100px;margin:auto;padding:24px 16px 50px}
+.panel{background:#fff;border:1px solid #e5e7eb;border-radius:22px;box-shadow:0 10px 30px rgba(17,24,39,.05)}
+.setup{max-width:620px;margin:30px auto;padding:26px}
+h1{margin:0;font-size:32px;letter-spacing:-1.5px}
+.sub{color:#6b7280;margin:7px 0 22px}
+label{display:block;font-weight:800;margin:15px 0 7px}
+input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius:12px;background:#fff}
+.primary{width:100%;margin-top:20px;padding:14px;border-radius:13px;background:#7c3aed;color:#fff;font-weight:900}
+.rules{margin-top:20px;padding:16px;border-radius:15px;background:#f7f5ff;color:#4c1d95;line-height:1.65;font-size:14px}
+.game{display:none}
+.status{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.player{padding:13px;background:#fff;border:2px solid #e5e7eb;border-radius:16px}
+.player.active{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.08)}
+.player .name{font-weight:900}
+.player .meta{font-size:13px;color:#6b7280;margin-top:4px}
+.boardPanel{padding:18px}
+.boardArea{position:relative;width:min(88vw,700px);aspect-ratio:1;margin:0 auto}
+.board{position:absolute;inset:4%;border-radius:50%;background:#fff;border:12px solid #e9e7ff;box-shadow:inset 0 0 0 1px #ddd,0 18px 45px rgba(0,0,0,.08)}
+.board:before{content:"";position:absolute;inset:25%;border-radius:50%;background:#f7f8fc;border:2px dashed #d7d9e0}
+.center{position:absolute;inset:39%;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;background:#fff;border:1px solid #e5e7eb;font-weight:900;color:#6d28d9;line-height:1.2;box-shadow:0 5px 18px rgba(0,0,0,.07);z-index:2}
+.key{position:absolute;width:82px;height:82px;margin:-41px 0 0 -41px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;border:3px solid #d6d8df;font-size:22px;font-weight:900;z-index:4;transition:.15s}
+.key.do{border-color:#7c3aed;background:#f5f3ff;color:#6d28d9}
+.key.target{box-shadow:0 0 0 6px rgba(124,58,237,.14);transform:scale(1.06)}
+.key small{position:absolute;bottom:-18px;font-size:10px;color:#9ca3af;font-weight:700}
+.token-stack{position:absolute;display:flex;flex-wrap:wrap;justify-content:center;gap:3px;width:74px;z-index:8;transform:translate(-50%,-50%)}
+.token{width:24px;height:24px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:900}
+.c0{background:#ef4444}.c1{background:#2563eb}.c2{background:#16a34a}.c3{background:#f59e0b}
+.controls{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-top:14px}
+.box{padding:18px;background:#fff;border:1px solid #e5e7eb;border-radius:18px}
+.turnTitle{font-size:14px;color:#6b7280}
+.turnName{font-size:24px;font-weight:950;margin:3px 0 14px}
+.draw{display:flex;align-items:center;gap:12px}
+.drawCard{width:95px;height:95px;border-radius:18px;background:#f7f8fc;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:1000}
+.action{flex:1}
+.action button{width:100%;padding:12px;border-radius:12px;background:#111827;color:#fff;font-weight:900}
+.action button:disabled{opacity:.45;cursor:not-allowed}
+.itemRow{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+.itemBtn{padding:13px;border-radius:12px;background:#f3f4f6;color:#111827;font-weight:900;border:2px solid transparent}
+.itemBtn.selected{background:#f5f3ff;border-color:#7c3aed;color:#6d28d9}
+.itemBtn:disabled{opacity:.4;cursor:not-allowed}
+.itemInfo{margin:10px 0 0;color:#6b7280;font-size:13px;line-height:1.5}
+.pieceRow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.pieceBtn{padding:12px 7px;border-radius:11px;background:#f3f4f6;font-weight:800;color:#111827}
+.pieceBtn.active{background:#111827;color:#fff}
+.pieceBtn.done{background:#dcfce7;color:#166534}
+.notice{margin-top:12px;padding:13px 15px;border-radius:13px;background:#fafafa;border:1px solid #e5e7eb;font-size:14px;line-height:1.5}
+.log{margin-top:14px;padding:14px;background:#111827;color:#e5e7eb;border-radius:15px;height:150px;overflow:auto;font-size:13px;line-height:1.6}
+.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:50;align-items:center;justify-content:center;padding:20px}
+.modalBox{width:min(92vw,430px);padding:30px;border-radius:24px;background:#fff;text-align:center;box-shadow:0 25px 80px rgba(0,0,0,.2)}
+.modalBox h2{font-size:32px;margin:0 0 8px}
+.modalBox p{color:#6b7280}
+.modalBox button{padding:13px 20px;border-radius:12px;background:#7c3aed;color:#fff;font-weight:900}
+@media(max-width:760px){
+ .status{grid-template-columns:repeat(2,1fr)}
+ .controls{grid-template-columns:1fr}
+ .key{width:62px;height:62px;margin:-31px 0 0 -31px;font-size:17px}
+ .token{width:20px;height:20px;font-size:8px}
+ .boardArea{width:min(96vw,600px)}
+}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="logo" onclick="goHome()">Form<span class="wheel"></span>Wheel</div>
+</header>
+
+<main class="wrap">
+  <section id="setup" class="panel setup">
+    <h1>🎹 Formwheel_Piano</h1>
+    <div class="sub">도넛 모양의 피아노 판을 따라 네 개의 말을 모두 통과시키세요.</div>
+
+    <label>플레이어 수</label>
+    <select id="playerCount" onchange="renderNames()">
+      <option value="2">2명</option>
+      <option value="3">3명</option>
+      <option value="4">4명</option>
+    </select>
+
+    <div id="names"></div>
+
+    <div class="rules">
+      <b>기본 규칙</b><br>
+      계이름 카드를 뽑고 그 음이 적힌 칸까지 이동합니다.
+      이동 중 도를 지나면 아이템을 1개 얻습니다.
+      #은 반음 위, ♭는 반음 아래로 목표 음을 바꿉니다.
+      상대 말이 있는 칸에 도착하면 상대 말은 1옥타브(12반음) 뒤로 갑니다.
+      시작 칸을 지나면 그 말은 통과합니다.
+    </div>
+
+    <button class="primary" onclick="startGame()">🎵 게임 시작</button>
+  </section>
+
+  <section id="game" class="game">
+    <div id="status" class="status"></div>
+
+    <section class="panel boardPanel">
+      <div class="boardArea">
+        <div id="board" class="board"></div>
+        <div class="center">FORMWHEEL<br>🎹</div>
+      </div>
+    </section>
+
+    <div class="controls">
+      <section class="box">
+        <div class="turnTitle">현재 차례</div>
+        <div id="turnName" class="turnName">-</div>
+        <div class="draw">
+          <div id="drawCard" class="drawCard">?</div>
+          <div class="action">
+            <button id="drawBtn" onclick="drawNote()">🎴 계이름 카드 뽑기</button>
+          </div>
+        </div>
+        <div id="notice" class="notice">계이름 카드를 뽑아주세요.</div>
+      </section>
+
+      <section class="box">
+        <b>아이템 카드</b>
+        <div class="itemRow">
+          <button id="sharpBtn" class="itemBtn" onclick="toggleItem('#')"># × <span id="sharpCount">0</span></button>
+          <button id="flatBtn" class="itemBtn" onclick="toggleItem('b')">♭ × <span id="flatCount">0</span></button>
+        </div>
+        <div class="itemInfo">
+          아이템은 이번 이동에 사용할 수 있습니다. 여러 장을 연속으로 선택할 수 있습니다.
+          예: # #을 사용하면 목표 음이 한 음씩 두 번 올라갑니다.
+        </div>
+      </section>
+    </div>
+
+    <section class="box" style="margin-top:14px">
+      <b>움직일 말 선택</b>
+      <div id="pieceRow" class="pieceRow"></div>
+    </section>
+
+    <div id="log" class="log"></div>
+  </section>
+</main>
+
+<div id="modal" class="modal">
+  <div class="modalBox">
+    <h2 id="winTitle">🎉 승리!</h2>
+    <p id="winText"></p>
+    <button onclick="location.reload()">다시 하기</button>
+  </div>
+</div>
+
+<script>
+const NATURAL = [
+  {name:"도", semi:0},
+  {name:"레", semi:2},
+  {name:"미", semi:4},
+  {name:"파", semi:5},
+  {name:"솔", semi:7},
+  {name:"라", semi:9},
+  {name:"시", semi:11}
+];
+
+const SEMI_NAMES = ["도","도♯","레","레♯","미","파","파♯","솔","솔♯","라","라♯","시"];
+const COLORS = ["c0","c1","c2","c3"];
+
+let players=[];
+let current=0;
+let drawn=null;
+let selectedPiece=0;
+let itemQueue=[];
+
+function goHome(){
+  location.href="https://semicolonxss.github.io/Formwheel/";
+}
+
+function renderNames(){
+  const n=Number(document.getElementById("playerCount").value);
+  let out="";
+  for(let i=0;i<n;i++){
+    out += `<label>플레이어 ${i+1} 이름</label>
+            <input id="pname${i}" maxlength="12" placeholder="플레이어 ${i+1}">`;
+  }
+  document.getElementById("names").innerHTML=out;
+}
+renderNames();
+
+function startGame(){
+  const n=Number(document.getElementById("playerCount").value);
+  players=[];
+  for(let i=0;i<n;i++){
+    players.push({
+      name:document.getElementById("pname"+i).value.trim() || `플레이어 ${i+1}`,
+      sharp:0,
+      flat:0,
+      pieces:[
+        {pos:0,done:false},
+        {pos:0,done:false},
+        {pos:0,done:false},
+        {pos:0,done:false}
+      ]
+    });
+  }
+  document.getElementById("setup").style.display="none";
+  document.getElementById("game").style.display="block";
+  buildBoard();
+  update();
+  log(`${players[0].name}부터 시작합니다.`);
+}
+
+function buildBoard(){
+  const board=document.getElementById("board");
+  board.innerHTML="";
+  for(let i=0;i<12;i++){
+    const a=(i/12)*Math.PI*2-Math.PI/2;
+    const r=42;
+    const x=50+Math.cos(a)*r;
+    const y=50+Math.sin(a)*r;
+    const d=document.createElement("div");
+    d.className="key"+(i===0?" do":"");
+    d.id="key"+i;
+    d.style.left=x+"%";
+    d.style.top=y+"%";
+    d.innerHTML=`${SEMI_NAMES[i]}${i===0?'<small>START</small>':""}`;
+    board.appendChild(d);
+  }
+}
+
+function update(){
+  const status=document.getElementById("status");
+  status.innerHTML=players.map((p,i)=>{
+    const done=p.pieces.filter(x=>x.done).length;
+    return `<div class="player ${i===current?"active":""}">
+      <div class="name">${escapeHtml(p.name)}</div>
+      <div class="meta">통과 ${done}/4 · # ${p.sharp} · ♭ ${p.flat}</div>
+    </div>`;
+  }).join("");
+
+  document.getElementById("turnName").textContent=players[current].name;
+  document.getElementById("sharpCount").textContent=players[current].sharp;
+  document.getElementById("flatCount").textContent=players[current].flat;
+
+  const row=document.getElementById("pieceRow");
+  row.innerHTML=players[current].pieces.map((p,i)=>{
+    let text=p.done?"✓ 통과":`말 ${i+1} · ${p.pos}칸`;
+    return `<button class="pieceBtn ${i===selectedPiece?"active":""} ${p.done?"done":""}" onclick="selectPiece(${i})">${text}</button>`;
+  }).join("");
+
+  document.getElementById("sharpBtn").classList.toggle("selected",itemQueue.includes("#"));
+  document.getElementById("flatBtn").classList.toggle("selected",itemQueue.includes("b"));
+
+  renderTokens();
+}
+
+function renderTokens(){
+  document.querySelectorAll(".token-stack").forEach(x=>x.remove());
+
+  players.forEach((p,pi)=>{
+    p.pieces.forEach((piece,idx)=>{
+      if(piece.done) return;
+      const semi=piece.pos%12;
+      const key=document.getElementById("key"+semi);
+      if(!key) return;
+
+      const a=(semi/12)*Math.PI*2-Math.PI/2;
+      const r=42;
+      const x=50+Math.cos(a)*r;
+      const y=50+Math.sin(a)*r;
+
+      let stack=document.querySelector(`.stack-${semi}`);
+      if(!stack){
+        stack=document.createElement("div");
+        stack.className=`token-stack stack-${semi}`;
+        stack.style.left=x+"%";
+        stack.style.top=y+"%";
+        document.querySelector(".boardArea").appendChild(stack);
+      }
+
+      const t=document.createElement("div");
+      t.className=`token ${COLORS[pi]}`;
+      t.title=`${p.name} 말 ${idx+1}`;
+      t.textContent=idx+1;
+      stack.appendChild(t);
+    });
+  });
+}
+
+function drawNote(){
+  if(drawn!==null){
+    log("이미 계이름 카드를 뽑았습니다.");
+    return;
+  }
+  drawn=NATURAL[Math.floor(Math.random()*NATURAL.length)];
+  document.getElementById("drawCard").textContent=drawn.name;
+  document.getElementById("drawBtn").disabled=true;
+  selectedPiece=findAvailablePiece();
+  document.getElementById("notice").textContent=`${drawn.name}에 도착하도록 이동합니다. 필요하면 # 또는 ♭를 사용하세요.`;
+  update();
+  highlightTarget();
+  log(`${players[current].name} → ${drawn.name} 카드`);
+}
+
+function findAvailablePiece(){
+  const arr=players[current].pieces;
+  const i=arr.findIndex(p=>!p.done);
+  return i<0?0:i;
+}
+
+function selectPiece(i){
+  if(players[current].pieces[i].done){
+    log("이미 통과한 말입니다.");
+    return;
+  }
+  selectedPiece=i;
+  update();
+  highlightTarget();
+}
+
+function toggleItem(type){
+  if(drawn===null){
+    log("먼저 계이름 카드를 뽑아주세요.");
+    return;
+  }
+  const p=players[current];
+  const count=type==="#"?p.sharp:p.flat;
+
+  if(count<=0){
+    log(`${type==="#"?"#":"♭"} 카드가 없습니다.`);
+    return;
+  }
+
+  const index=itemQueue.indexOf(type);
+  if(index>=0){
+    itemQueue.splice(index,1);
+  }else{
+    itemQueue.push(type);
+  }
+  update();
+  highlightTarget();
+}
+
+function targetSemi(){
+  if(drawn===null) return null;
+  let s=drawn.semi;
+  for(const item of itemQueue){
+    s += item==="#"?1:-1;
+  }
+  s=((s%12)+12)%12;
+  return s;
+}
+
+function nextDestination(pos,target){
+  let delta=(target-(pos%12)+12)%12;
+  if(delta===0) delta=12;
+  return pos+delta;
+}
+
+function highlightTarget(){
+  document.querySelectorAll(".key").forEach(k=>k.classList.remove("target"));
+  const t=targetSemi();
+  if(t!==null) document.getElementById("key"+t)?.classList.add("target");
+}
+
+function moveSelected(){
+  if(drawn===null){
+    log("먼저 계이름 카드를 뽑아주세요.");
+    return;
+  }
+
+  const p=players[current];
+  const piece=p.pieces[selectedPiece];
+
+  if(piece.done){
+    log("이미 통과한 말입니다.");
+    return;
+  }
+
+  const dest=nextDestination(piece.pos,targetSemi());
+  const passedDo=Math.floor(dest/12)>Math.floor(piece.pos/12);
+
+  if(passedDo){
+    p.sharp++;
+    log(`${p.name}이(가) 도를 지나 아이템 카드 1장을 얻었습니다. (# +1)`);
+  }
+
+  piece.pos=dest;
+
+  // 선택한 아이템 실제 소모
+  for(const item of itemQueue){
+    if(item==="#") p.sharp--;
+    else p.flat--;
+  }
+
+  // 상대가 같은 칸에 있으면 1옥타브(12반음) 뒤로
+  players.forEach((op,oi)=>{
+    if(oi===current) return;
+    op.pieces.forEach((other,oj)=>{
+      if(other.done) return;
+      if(other.pos===piece.pos){
+        other.pos=Math.max(0,other.pos-12);
+        log(`⚔️ ${p.name}이(가) ${op.name}의 말 ${oj+1}과 충돌! 상대 말이 1옥타브 뒤로 이동합니다.`);
+      }
+    });
+  });
+
+  // 시작 칸에 도착하거나 지나가면 통과
+  if(piece.pos>=12){
+    piece.done=true;
+    piece.pos=12;
+    log(`🏁 ${p.name}의 말 ${selectedPiece+1}이(가) 통과했습니다!`);
+
+    if(p.pieces.every(x=>x.done)){
+      win(p.name);
+      return;
+    }
+
+    // 다음 말을 자동 선택
+    const next=p.pieces.findIndex(x=>!x.done);
+    if(next>=0) selectedPiece=next;
+  }
+
+  const used=itemQueue.length;
+  if(used) log(`${used}개의 아이템을 사용했습니다.`);
+
+  itemQueue=[];
+  drawn=null;
+  document.getElementById("drawCard").textContent="?";
+  document.getElementById("drawBtn").disabled=false;
+  document.getElementById("notice").textContent="다음 플레이어의 차례입니다.";
+
+  current=(current+1)%players.length;
+  update();
+}
+
+function win(name){
+  update();
+  document.getElementById("winTitle").textContent="🎉 승리!";
+  document.getElementById("winText").textContent=`${name}이(가) 네 개의 말을 모두 통과시켰습니다!`;
+  document.getElementById("modal").style.display="flex";
+  document.getElementById("drawBtn").disabled=true;
+  document.getElementById("notice").textContent="게임 종료";
+}
+
+function log(text){
+  const el=document.getElementById("log");
+  el.innerHTML += `<div>• ${escapeHtml(text)}</div>`;
+  el.scrollTop=el.scrollHeight;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,m=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
+}
+
+// 이동 버튼은 말 선택 후 화면 아래에 별도 버튼 없이,
+// 말 선택 시 보드 아래에 "이동" 버튼을 생성한다.
+const originalSelectPiece=selectPiece;
+selectPiece=function(i){
+  originalSelectPiece(i);
+  updateMoveButton();
+};
+
+function updateMoveButton(){
+  let b=document.getElementById("moveBtn");
+  if(!b){
+    b=document.createElement("button");
+    b.id="moveBtn";
+    b.style.cssText="width:100%;margin-top:10px;padding:13px;border-radius:12px;background:#7c3aed;color:white;font-weight:900";
+    b.onclick=moveSelected;
+    document.getElementById("pieceRow").parentElement.appendChild(b);
+  }
+  b.textContent=drawn===null?"이동하려면 먼저 계이름 카드를 뽑으세요":"🎵 선택한 말 이동하기";
+  b.disabled=drawn===null;
+}
+
+// draw 후에도 이동 버튼 상태 갱신
+const oldDraw=drawNote;
+drawNote=function(){
+  oldDraw();
+  updateMoveButton();
+};
+</script>
+</body>
+</html>
