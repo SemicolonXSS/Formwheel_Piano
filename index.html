@@ -39,16 +39,18 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
 .player .name{font-weight:900}
 .player .meta{font-size:13px;color:#6b7280;margin-top:4px}
 .boardPanel{padding:18px}
-.boardArea{position:relative;width:min(88vw,700px);aspect-ratio:1;margin:0 auto}
-.board{position:absolute;inset:4%;border-radius:50%;background:#fff;border:12px solid #e9e7ff;box-shadow:inset 0 0 0 1px #ddd,0 18px 45px rgba(0,0,0,.08)}
+.boardArea{position:relative;width:min(94vw,900px);aspect-ratio:1;margin:0 auto}
+.board{container-type:inline-size;position:absolute;inset:4%;border-radius:50%;background:#fff;border:12px solid #e9e7ff;box-shadow:inset 0 0 0 1px #ddd,0 18px 45px rgba(0,0,0,.08)}
 .board:before{content:"";position:absolute;inset:25%;border-radius:50%;background:#f7f8fc;border:2px dashed #d7d9e0}
 .center{position:absolute;inset:39%;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;background:#fff;border:1px solid #e5e7eb;font-weight:900;color:#6d28d9;line-height:1.2;box-shadow:0 5px 18px rgba(0,0,0,.07);z-index:2}
-.key{position:absolute;width:82px;height:82px;margin:-41px 0 0 -41px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;border:3px solid #d6d8df;font-size:22px;font-weight:900;z-index:4;transition:.15s}
+.key{position:absolute;width:4.9%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;border:2px solid #d6d8df;font-size:clamp(6px,1.55cqw,14px);font-weight:900;line-height:1;color:#374151;z-index:4;transition:.15s}
+.key.sharp{background:#f3f4f6;color:#6b7280;font-weight:800}
 .key.do{border-color:#7c3aed;background:#f5f3ff;color:#6d28d9}
-.key.target{box-shadow:0 0 0 6px rgba(124,58,237,.14);transform:scale(1.06)}
-.key small{position:absolute;bottom:-18px;font-size:10px;color:#9ca3af;font-weight:700}
-.token-stack{position:absolute;display:flex;flex-wrap:wrap;justify-content:center;gap:3px;width:74px;z-index:8;transform:translate(-50%,-50%)}
-.token{width:24px;height:24px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:900}
+.key.soft{background:#ede9fe;border-color:#a78bfa}
+.key.target{box-shadow:0 0 0 .5cqw rgba(124,58,237,.25);transform:translate(-50%,-50%) scale(1.3);border-color:#7c3aed;background:#ddd6fe;z-index:6}
+.key small{position:absolute;top:-1.9cqw;font-size:clamp(5px,1.15cqw,10px);color:#7c3aed;font-weight:800;white-space:nowrap}
+.token-stack{position:absolute;display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:1px;width:5.6cqw;min-width:26px;z-index:8;transform:translate(-50%,-50%);pointer-events:none}
+.token{width:clamp(9px,1.9cqw,17px);height:clamp(9px,1.9cqw,17px);border-radius:50%;border:1.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(5px,1cqw,9px);font-weight:900;pointer-events:auto}
 .c0{background:#ef4444}.c1{background:#2563eb}.c2{background:#16a34a}.c3{background:#f59e0b}
 .controls{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-top:14px}
 .box{padding:18px;background:#fff;border:1px solid #e5e7eb;border-radius:18px}
@@ -84,9 +86,10 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
 @media(max-width:760px){
  .status{grid-template-columns:repeat(2,1fr)}
  .controls{grid-template-columns:1fr}
- .key{width:62px;height:62px;margin:-31px 0 0 -31px;font-size:17px}
- .token{width:20px;height:20px;font-size:8px}
- .boardArea{width:min(96vw,600px)}
+ .wrap{padding:16px 8px 40px}
+ .boardPanel{padding:6px}
+ .boardArea{width:min(100%,600px)}
+ .key.sharp{font-size:0}
  .roomBar{align-items:flex-start}
 }
 </style>
@@ -120,7 +123,7 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
         이동 중 도를 지나면 아이템을 1개 얻습니다.
         #은 반음 위, ♭는 반음 아래로 목표 음을 바꿉니다.
         상대 말이 있는 칸에 도착하면 상대 말은 1옥타브(12반음) 뒤로 갑니다.
-        시작 칸을 지나면 그 말은 통과합니다.
+        판 한 바퀴는 4옥타브(48칸)이고, 한 바퀴를 돌아 시작 칸에 도착하면 그 말은 통과합니다.
       </div>
     </div>
 
@@ -147,7 +150,7 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
     <section class="panel boardPanel">
       <div class="boardArea">
         <div id="board" class="board"></div>
-        <div class="center">FORMWHEEL<br>🎹</div>
+        <div class="center">FORMWHEEL<br>🎹<br><span style="font-size:.6em;color:#6b7280">4옥타브 · 48칸</span></div>
       </div>
     </section>
 
@@ -236,6 +239,8 @@ onValue(ref(db,".info/connected"),snap=>{
 });
 
 const ROOT="pianoRooms";
+const OCTAVES=4;
+const TRACK=12*OCTAVES; // 판 한 바퀴 = 48칸
 const NATURAL=[
   {name:"도",semi:0},{name:"레",semi:2},{name:"미",semi:4},{name:"파",semi:5},
   {name:"솔",semi:7},{name:"라",semi:9},{name:"시",semi:11}
@@ -604,7 +609,7 @@ function updateUI(){
   const row=document.getElementById("pieceRow");
   if(me){
     row.innerHTML=me.pieces.map((p,i)=>{
-      const text=p.done?"✓ 통과":`말 ${i+1} · ${p.pos}칸`;
+      const text=p.done?"✓ 통과":`말 ${i+1} · ${p.pos}/${TRACK}`;
       return `<button class="pieceBtn ${i===selectedPiece&&!p.done?"active":""} ${p.done?"done":""}" onclick="selectPiece(${i})" ${(!isMyTurn||p.done)?"disabled":""}>${text}</button>`;
     }).join("");
   }
@@ -638,38 +643,44 @@ function renderLogs(){
 function buildBoard(){
   const board=document.getElementById("board");
   board.innerHTML="";
-  for(let i=0;i<12;i++){
-    const a=(i/12)*Math.PI*2-Math.PI/2;
+  const SHARPS=[1,3,6,8,10];
+  for(let i=0;i<TRACK;i++){
+    const pc=i%12;
+    const a=(i/TRACK)*Math.PI*2-Math.PI/2;
     const r=42;
     const x=50+Math.cos(a)*r;
     const y=50+Math.sin(a)*r;
     const d=document.createElement("div");
-    d.className="key"+(i===0?" do":"");
+    d.className="key"+(pc===0?" do":"")+(SHARPS.includes(pc)?" sharp":"");
     d.id="key"+i;
     d.style.left=x+"%";
     d.style.top=y+"%";
-    d.innerHTML=`${SEMI_NAMES[i]}${i===0?'<small>START</small>':""}`;
+    let extra="";
+    if(i===0)extra="<small>START</small>";
+    else if(pc===0)extra=`<small>${i/12+1}옥</small>`;
+    d.innerHTML=`${SEMI_NAMES[pc]}${extra}`;
     board.appendChild(d);
   }
 }
 
 function renderTokens(){
-  document.querySelectorAll(".token-stack").forEach(x=>x.remove());
+  const board=document.getElementById("board");
+  board.querySelectorAll(".token-stack").forEach(x=>x.remove());
   roomData.players.forEach((p,pi)=>{
     p.pieces.forEach((piece,idx)=>{
       if(piece.done)return;
-      const semi=((piece.pos%12)+12)%12;
-      const a=(semi/12)*Math.PI*2-Math.PI/2;
+      const cell=Math.min(Math.max(piece.pos,0),TRACK-1);
+      const a=(cell/TRACK)*Math.PI*2-Math.PI/2;
       const r=42;
       const x=50+Math.cos(a)*r;
       const y=50+Math.sin(a)*r;
-      let stack=document.querySelector(`.stack-${semi}`);
+      let stack=board.querySelector(`.stack-${cell}`);
       if(!stack){
         stack=document.createElement("div");
-        stack.className=`token-stack stack-${semi}`;
+        stack.className=`token-stack stack-${cell}`;
         stack.style.left=x+"%";
         stack.style.top=y+"%";
-        document.querySelector(".boardArea").appendChild(stack);
+        board.appendChild(stack);
       }
       const t=document.createElement("div");
       t.className=`token ${COLORS[pi]}`;
@@ -695,9 +706,22 @@ function nextDestination(pos,target){
 }
 
 function highlightTarget(){
-  document.querySelectorAll(".key").forEach(k=>k.classList.remove("target"));
+  document.querySelectorAll(".key").forEach(k=>k.classList.remove("target","soft"));
   const t=targetSemi();
-  if(t!==null)document.getElementById("key"+t)?.classList.add("target");
+  if(t===null)return;
+  // 목표 음이 적힌 모든 칸을 연하게 표시
+  for(let i=0;i<TRACK;i++){
+    if(i%12===t)document.getElementById("key"+i)?.classList.add("soft");
+  }
+  // 내 차례라면 선택한 말이 실제로 도착할 칸을 진하게 표시 (통과하면 시작 칸)
+  const mi=myIndex();
+  if(mi>=0&&mi===roomData.current){
+    const piece=roomData.players[mi].pieces[selectedPiece];
+    if(piece&&!piece.done){
+      const dest=nextDestination(piece.pos,t);
+      document.getElementById("key"+(dest>=TRACK?0:dest))?.classList.add("target");
+    }
+  }
 }
 
 /* ---------- 게임 동작 ---------- */
@@ -807,9 +831,9 @@ async function moveSelected(){
         });
       });
 
-      if(piece.pos>=12){
+      if(piece.pos>=TRACK){
         piece.done=true;
-        piece.pos=12;
+        piece.pos=TRACK;
         current.logs.push(`🏁 ${p.name}의 말 ${idx+1}이(가) 통과했습니다!`);
         if(p.pieces.every(x=>x.done)){
           current.winner=p.name;
