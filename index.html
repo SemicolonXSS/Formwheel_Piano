@@ -257,8 +257,10 @@ textarea{resize:vertical;min-height:64px}
         <option value="easy">쉬움</option>
         <option value="normal" selected>보통</option>
         <option value="hard">어려움</option>
+        <option value="extreme" id="soloExtremeOption">🔒 익스트림</option>
       </select>
     </div>
+    <div id="soloUnlockHint" class="notice" style="margin-top:12px">💡 어려움 난이도를 클리어하면 <b>익스트림</b> 봇이 해금됩니다.</div>
     <div class="setBtns">
       <button class="save" onclick="startSolo()">🎮 솔로 게임 시작</button>
       <button class="ghost" onclick="closeSoloModal()">취소</button>
@@ -393,7 +395,11 @@ const RULE_TYPES=[
   {key:"semitoneBonus",label:"🎹",name:"반음 칸 보너스",desc:"반음(♯) 칸에 도착하면 아이템 1장을 얻습니다. (아이템을 사용 중일 때)"},
   {key:"hitReward",label:"💥",name:"충돌 보상",desc:"충돌로 상대 말을 밀어내면 아이템 1장을 얻습니다. (아이템을 사용 중일 때)"},
   {key:"sameNoteAgain",label:"🔁",name:"같은 음 연속 보너스",desc:"바로 전 차례와 같은 계이름 카드를 뽑아 이동하면 한 번 더 진행합니다."},
-  {key:"exactFinish",label:"🎯",name:"정확히 도착해야 통과",desc:"시작 칸을 지나치는 이동은 할 수 없고, 정확히 도착해야 통과합니다. 움직일 수 있는 말이 없으면 차례가 넘어갑니다."}
+  {key:"exactFinish",label:"🎯",name:"정확히 도착해야 통과",desc:"시작 칸을 지나치는 이동은 할 수 없고, 정확히 도착해야 통과합니다. 움직일 수 있는 말이 없으면 차례가 넘어갑니다."},
+  {key:"doLandingBonus",label:"🏠",name:"도 착지 보너스",desc:"도를 지나가는 것이 아니라 도 칸에 정확히 도착하면 아이템 1장을 얻습니다."},
+  {key:"collisionSteal",label:"🧲",name:"충돌 아이템 강탈",desc:"상대 말을 밀어내는 데 성공하면 상대가 가진 아이템 1장을 무작위로 빼앗습니다."},
+  {key:"sharpAgain",label:"⚡",name:"반음 추가 턴",desc:"♯ 칸에 도착하면 아이템 대신 한 번 더 진행합니다. 반음 칸 보너스와 함께 사용할 수 있습니다."},
+  {key:"doublePass",label:"🎁",name:"도 통과 2배 보상",desc:"도를 지날 때 받는 아이템 보상이 2배가 됩니다."}
 ];
 
 /* ---------- 게임 설정 ---------- */
@@ -814,10 +820,30 @@ async function leaveRoom(){
 }
 
 /* ---------- 솔로 모드 ---------- */
-const DIFF_LABEL={easy:"쉬움",normal:"보통",hard:"어려움"};
+const DIFF_LABEL={easy:"쉬움",normal:"보통",hard:"어려움",extreme:"익스트림"};
+
+function isExtremeUnlocked(){
+  return localStorage.getItem("formwheel_piano_extreme_unlocked")==="1";
+}
+
+function refreshSoloDifficulty(){
+  const opt=document.getElementById("soloExtremeOption");
+  const hint=document.getElementById("soloUnlockHint");
+  const unlocked=isExtremeUnlocked();
+  if(opt){
+    opt.disabled=!unlocked;
+    opt.textContent=unlocked?"🔥 익스트림":"🔒 익스트림 (어려움 클리어 필요)";
+  }
+  if(hint){
+    hint.innerHTML=unlocked
+      ?"🔥 <b>익스트림</b> 난이도가 해금되어 있습니다. 더욱 강한 AI와 대결하세요!"
+      :"💡 어려움 난이도를 클리어하면 <b>익스트림</b> 봇이 해금됩니다.";
+  }
+}
 
 window.openSoloModal=function(){
   clearError();
+  refreshSoloDifficulty();
   document.getElementById("soloModal").style.display="flex";
 };
 window.closeSoloModal=function(){
@@ -841,6 +867,11 @@ window.startSolo=function(){
   myName=(document.getElementById("myName").value.trim()||"플레이어").slice(0,12);
   const count=Number(document.getElementById("solo_count").value)||1;
   const diff=document.getElementById("solo_diff").value;
+  if(diff==="extreme"&&!isExtremeUnlocked()){
+    alert("🔒 익스트림은 어려움 난이도를 먼저 클리어하면 해금됩니다.");
+    refreshSoloDifficulty();
+    return;
+  }
   mode="solo";
   roomCode="SOLO";
   roomRef=null;
@@ -848,6 +879,8 @@ window.startSolo=function(){
   const human=makePlayer(myName);
   const bots=range(1,count).map(i=>makeBotPlayer(`컴퓨터 ${i} (${DIFF_LABEL[diff]})`,diff,i));
   roomData=normalize(initialState([human,...bots]));
+  roomData.soloDifficulty=diff;
+  roomData.soloHumanId=human.id;
   window.closeSoloModal();
   showLobby();
 };
@@ -932,13 +965,15 @@ async function botAct(){
       roomData.players.forEach((op,oi)=>{
         if(oi===idx)return;
         op.pieces.forEach(other=>{
-          if(!other.done&&other.pos===dest)score+=80;
+          if(!other.done&&other.pos===dest)score+=(diff==="extreme"?140:80);
         });
       });
     }
+    if(cfg.rules.doLandingBonus&&dest<TR&&dest%12===0)score+=35;
+    if(cfg.rules.sharpAgain&&dest<TR&&SHARP_PCS.includes(dest%12))score+=45;
     const used=sharpN+flatN+(again?1:0);
-    score-=used*8;
-    if(again)score+=60;
+    score-=used*(diff==="extreme"?4:8);
+    if(again)score+=(diff==="extreme"?90:60);
     return score;
   }
 
@@ -949,15 +984,15 @@ async function botAct(){
     const limit=cfg.itemLimit;
     const within=n=>limit<=0||n<=limit;
     if(cfg.itemsOn.sharp&&maxS>0){
-      const top=diff==="hard"?maxS:1;
-      for(let s=1;s<=top;s++)if(within(s))combos.push({sharp:s,flat:0});
+      const top=diff==="extreme"?maxS:diff==="hard"?maxS:1;
+      for(let ss=1;ss<=top;ss++)if(within(ss))combos.push({sharp:ss,flat:0});
     }
     if(cfg.itemsOn.flat&&maxF>0){
-      const top=diff==="hard"?maxF:1;
-      for(let f=1;f<=top;f++)if(within(f))combos.push({sharp:0,flat:f});
+      const top=diff==="extreme"?maxF:diff==="hard"?maxF:1;
+      for(let ff=1;ff<=top;ff++)if(within(ff))combos.push({sharp:0,flat:ff});
     }
-    if(diff==="hard"&&cfg.itemsOn.sharp&&cfg.itemsOn.flat&&maxS>0&&maxF>0){
-      for(let s=1;s<=maxS;s++)for(let f=1;f<=maxF;f++)if(within(s+f))combos.push({sharp:s,flat:f});
+    if((diff==="hard"||diff==="extreme")&&cfg.itemsOn.sharp&&cfg.itemsOn.flat&&maxS>0&&maxF>0){
+      for(let ss=1;ss<=maxS;ss++)for(let ff=1;ff<=maxF;ff++)if(within(ss+ff))combos.push({sharp:ss,flat:ff});
     }
   }
   if(cfg.itemsOn.again&&p.items.again>0&&diff!=="easy"){
@@ -983,7 +1018,11 @@ async function botAct(){
   const canReroll=cfg.itemsOn.reroll&&p.items.reroll>0;
   const noLegal=!best;
   const weak=best&&best.score<=0;
-  const shouldReroll=canReroll&&(diff==="hard"?(noLegal||weak):diff==="normal"?noLegal:false);
+  const shouldReroll=canReroll&&(
+    diff==="extreme"?(noLegal||weak):
+    diff==="hard"?(noLegal||weak):
+    diff==="normal"?noLegal:false
+  );
   if(shouldReroll){
     await applyTx(current=>{
       if(current.current!==idx||!current.drawn||current.winner||current.pending)return;
@@ -1409,7 +1448,10 @@ function performMove(current,me,wantedPiece,queue){
   const passedDo=Math.floor(dest/12)>Math.floor(piece.pos/12);
 
   // 도를 지나면 보상 아이템
-  if(passedDo)grantItems(current,p,cfg.passReward,"도를 지나");
+  if(passedDo){
+    const reward=cfg.passReward*(cfg.rules.doublePass?2:1);
+    grantItems(current,p,reward,"도를 지나");
+  }
 
   piece.pos=dest;
 
@@ -1423,8 +1465,17 @@ function performMove(current,me,wantedPiece,queue){
     grantItems(current,p,1,"반음 칸에 도착해");
   }
 
-  // 한 번 더 (아이템 또는 같은 음 연속 룰)
+  // 도에 정확히 착지하면 보너스
+  if(cfg.rules.doLandingBonus&&dest<TR&&dest%12===0){
+    grantItems(current,p,1,"도에 착지해");
+  }
+
+  // 한 번 더 (아이템 또는 특별 룰)
   let extra=useAgain;
+  if(cfg.rules.sharpAgain&&dest<TR&&SHARP_PCS.includes(dest%12)){
+    extra=true;
+    current.logs.push(`⚡ ${p.name}이(가) 반음 칸에 도착해 한 번 더 진행합니다!`);
+  }
   if(cfg.rules.sameNoteAgain&&p.lastSemi===current.drawn.semi){
     extra=true;
     current.logs.push(`🔁 ${p.name}이(가) 같은 음을 연속으로 뽑았습니다!`);
@@ -1448,6 +1499,15 @@ function performMove(current,me,wantedPiece,queue){
           return;
         }
         knockback(current,me,oi,oj);
+        if(cfg.rules.collisionSteal){
+          const stealable=ITEM_TYPES.filter(t=>(op.items[t.key]||0)>0);
+          if(stealable.length){
+            const stolen=stealable[Math.floor(Math.random()*stealable.length)];
+            op.items[stolen.key]-=1;
+            p.items[stolen.key]+=1;
+            current.logs.push(`🧲 ${p.name}이(가) ${op.name}에게서 ${stolen.label} ${stolen.name} 1장을 빼앗았습니다!`);
+          }
+        }
       });
     });
   }
@@ -1612,6 +1672,16 @@ async function respondShield(use,force){
         current.logs.push(`🛡 ${op.name}의 말 ${v.i+1}이(가) 방어 카드로 ${current.players[pd.by].name}의 충돌을 막았습니다!`);
       }else{
         knockback(current,pd.by,v.p,v.i);
+        if(current.settings.rules.collisionSteal){
+          const attacker=current.players[pd.by];
+          const stealable=ITEM_TYPES.filter(t=>(op.items[t.key]||0)>0);
+          if(stealable.length){
+            const stolen=stealable[Math.floor(Math.random()*stealable.length)];
+            op.items[stolen.key]-=1;
+            attacker.items[stolen.key]+=1;
+            current.logs.push(`🧲 ${attacker.name}이(가) ${op.name}에게서 ${stolen.label} ${stolen.name} 1장을 빼앗았습니다!`);
+          }
+        }
       }
       // 방어 카드가 없는 다음 피해자는 바로 처리
       while(pd.victims.length){
@@ -1652,6 +1722,22 @@ setInterval(()=>{
 },1000);
 
 function showWinner(name){
+  if(mode==="solo"&&roomData&&name===myName){
+    const diff=roomData.soloDifficulty;
+    if(diff==="hard"&&!isExtremeUnlocked()){
+      localStorage.setItem("formwheel_piano_extreme_unlocked","1");
+      document.getElementById("winTitle").textContent="🔥 어려움 클리어!";
+      document.getElementById("winText").textContent="축하합니다! 솔로 모드의 익스트림 봇이 해금되었습니다.";
+      document.getElementById("modal").style.display="flex";
+      return;
+    }
+    if(diff==="extreme"){
+      document.getElementById("winTitle").textContent="👑 익스트림 격파!";
+      document.getElementById("winText").textContent="최고 난이도의 봇까지 이겼습니다!";
+      document.getElementById("modal").style.display="flex";
+      return;
+    }
+  }
   document.getElementById("winTitle").textContent="🎉 승리!";
   document.getElementById("winText").textContent=`${name}이(가) 승리했습니다!`;
   document.getElementById("modal").style.display="flex";
