@@ -16,13 +16,20 @@ button{cursor:pointer;border:0}
 .logo .wheel:after{content:"";position:absolute;inset:5px;background:#7c3aed;border-radius:50%}
 .wrap{max-width:1100px;margin:auto;padding:24px 16px 50px}
 .panel{background:#fff;border:1px solid #e5e7eb;border-radius:22px;box-shadow:0 10px 30px rgba(17,24,39,.05)}
-.setup{max-width:620px;margin:30px auto;padding:26px}
+.setup{max-width:680px;margin:30px auto;padding:26px}
 h1{margin:0;font-size:32px;letter-spacing:-1.5px}
 .sub{color:#6b7280;margin:7px 0 22px}
 label{display:block;font-weight:800;margin:15px 0 7px}
 input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius:12px;background:#fff}
-.primary{width:100%;margin-top:20px;padding:14px;border-radius:13px;background:#7c3aed;color:#fff;font-weight:900}
+.primary{width:100%;margin-top:14px;padding:14px;border-radius:13px;background:#7c3aed;color:#fff;font-weight:900}
+.secondary{width:100%;margin-top:10px;padding:13px;border-radius:13px;background:#111827;color:#fff;font-weight:900}
+.roomBox{padding:17px;border-radius:17px;background:#f7f5ff;border:1px solid #e8e0ff;margin-top:16px}
+.roomCode{font-size:34px;font-weight:1000;letter-spacing:7px;text-align:center;color:#6d28d9;margin:7px 0}
+.roomHint{text-align:center;color:#6b7280;font-size:13px;line-height:1.5}
+.playersWaiting{margin-top:13px;display:grid;gap:7px}
+.waitPlayer{padding:10px 12px;border-radius:11px;background:#fff;border:1px solid #e5e7eb;font-weight:800}
 .rules{margin-top:20px;padding:16px;border-radius:15px;background:#f7f5ff;color:#4c1d95;line-height:1.65;font-size:14px}
+.error{display:none;margin-top:12px;padding:12px;border-radius:12px;background:#fef2f2;color:#b91c1c;font-size:13px;line-height:1.5}
 .game{display:none}
 .status{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
 .player{padding:13px;background:#fff;border:2px solid #e5e7eb;border-radius:16px}
@@ -61,6 +68,9 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
 .pieceBtn.done{background:#dcfce7;color:#166534}
 .notice{margin-top:12px;padding:13px 15px;border-radius:13px;background:#fafafa;border:1px solid #e5e7eb;font-size:14px;line-height:1.5}
 .log{margin-top:14px;padding:14px;background:#111827;color:#e5e7eb;border-radius:15px;height:150px;overflow:auto;font-size:13px;line-height:1.6}
+.roomBar{margin-bottom:14px;padding:12px 15px;background:#fff;border:1px solid #e5e7eb;border-radius:15px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.roomBar b{letter-spacing:2px;color:#6d28d9}
+.smallBtn{padding:8px 11px;border-radius:9px;background:#f3f4f6;font-weight:800}
 .modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:50;align-items:center;justify-content:center;padding:20px}
 .modalBox{width:min(92vw,430px);padding:30px;border-radius:24px;background:#fff;text-align:center;box-shadow:0 25px 80px rgba(0,0,0,.2)}
 .modalBox h2{font-size:32px;margin:0 0 8px}
@@ -72,6 +82,7 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
  .key{width:62px;height:62px;margin:-31px 0 0 -31px;font-size:17px}
  .token{width:20px;height:20px;font-size:8px}
  .boardArea{width:min(96vw,600px)}
+ .roomBar{align-items:flex-start}
 }
 </style>
 </head>
@@ -83,30 +94,48 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
 <main class="wrap">
   <section id="setup" class="panel setup">
     <h1>🎹 Formwheel_Piano</h1>
-    <div class="sub">도넛 모양의 피아노 판을 따라 네 개의 말을 모두 통과시키세요.</div>
+    <div class="sub">실시간 멀티플레이어 피아노 보드게임</div>
 
-    <label>플레이어 수</label>
-    <select id="playerCount" onchange="renderNames()">
-      <option value="2">2명</option>
-      <option value="3">3명</option>
-      <option value="4">4명</option>
-    </select>
+    <div id="roomMenu">
+      <label>내 이름</label>
+      <input id="myName" maxlength="12" placeholder="닉네임">
 
-    <div id="names"></div>
+      <button class="primary" onclick="createRoom()">🎵 방 만들기</button>
 
-    <div class="rules">
-      <b>기본 규칙</b><br>
-      계이름 카드를 뽑고 그 음이 적힌 칸까지 이동합니다.
-      이동 중 도를 지나면 아이템을 1개 얻습니다.
-      #은 반음 위, ♭는 반음 아래로 목표 음을 바꿉니다.
-      상대 말이 있는 칸에 도착하면 상대 말은 1옥타브(12반음) 뒤로 갑니다.
-      시작 칸을 지나면 그 말은 통과합니다.
+      <label>방 코드로 참가</label>
+      <input id="joinCode" maxlength="4" inputmode="numeric" placeholder="예: 1234">
+      <button class="secondary" onclick="joinRoom()">🚪 방 참가</button>
+
+      <div id="error" class="error"></div>
+
+      <div class="rules">
+        <b>게임 규칙</b><br>
+        계이름 카드를 뽑고 그 음이 적힌 칸까지 이동합니다.
+        이동 중 도를 지나면 아이템을 1개 얻습니다.
+        #은 반음 위, ♭는 반음 아래로 목표 음을 바꿉니다.
+        상대 말이 있는 칸에 도착하면 상대 말은 1옥타브(12반음) 뒤로 갑니다.
+        시작 칸을 지나면 그 말은 통과합니다.
+      </div>
     </div>
 
-    <button class="primary" onclick="startGame()">🎵 게임 시작</button>
+    <div id="lobby" style="display:none">
+      <div class="roomBox">
+        <div style="text-align:center;font-weight:900">방 코드</div>
+        <div id="lobbyCode" class="roomCode">----</div>
+        <div class="roomHint">친구에게 이 4자리 코드를 알려주세요.<br>같은 코드를 입력하면 실시간으로 같은 게임에 들어옵니다.</div>
+        <div id="waitingPlayers" class="playersWaiting"></div>
+      </div>
+      <button id="startGameBtn" class="primary" onclick="hostStartGame()">🎮 게임 시작</button>
+      <button class="secondary" onclick="leaveRoom()">방 나가기</button>
+      <div id="lobbyError" class="error"></div>
+    </div>
   </section>
 
   <section id="game" class="game">
+    <div class="roomBar">
+      <div>방 코드 <b id="gameRoomCode">----</b></div>
+      <button class="smallBtn" onclick="copyRoomCode()">코드 복사</button>
+    </div>
     <div id="status" class="status"></div>
 
     <section class="panel boardPanel">
@@ -126,7 +155,7 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
             <button id="drawBtn" onclick="drawNote()">🎴 계이름 카드 뽑기</button>
           </div>
         </div>
-        <div id="notice" class="notice">계이름 카드를 뽑아주세요.</div>
+        <div id="notice" class="notice">현재 차례인 플레이어가 계이름 카드를 뽑습니다.</div>
       </section>
 
       <section class="box">
@@ -136,8 +165,7 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
           <button id="flatBtn" class="itemBtn" onclick="toggleItem('b')">♭ × <span id="flatCount">0</span></button>
         </div>
         <div class="itemInfo">
-          아이템은 이번 이동에 사용할 수 있습니다. 여러 장을 연속으로 선택할 수 있습니다.
-          예: # #을 사용하면 목표 음이 한 음씩 두 번 올라갑니다.
+          이번 이동에 사용할 아이템입니다. 여러 장을 연속으로 선택할 수 있습니다.
         </div>
       </section>
     </div>
@@ -145,6 +173,7 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
     <section class="box" style="margin-top:14px">
       <b>움직일 말 선택</b>
       <div id="pieceRow" class="pieceRow"></div>
+      <button id="moveBtn" style="width:100%;margin-top:10px;padding:13px;border-radius:12px;background:#7c3aed;color:white;font-weight:900" onclick="moveSelected()">🎵 선택한 말 이동하기</button>
     </section>
 
     <div id="log" class="log"></div>
@@ -159,62 +188,268 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
   </div>
 </div>
 
-<script>
-const NATURAL = [
-  {name:"도", semi:0},
-  {name:"레", semi:2},
-  {name:"미", semi:4},
-  {name:"파", semi:5},
-  {name:"솔", semi:7},
-  {name:"라", semi:9},
-  {name:"시", semi:11}
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import {getDatabase, ref, get, set, onValue, runTransaction} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
+const firebaseConfig={
+  apiKey:"AIzaSyBreTSe1m0-xlbF4aupnU5isRZCihR25IE",
+  authDomain:"formwheel.firebaseapp.com",
+  databaseURL:"https://formwheel-default-rtdb.firebaseio.com",
+  projectId:"formwheel",
+  storageBucket:"formwheel.firebasestorage.app",
+  messagingSenderId:"431583088241",
+  appId:"1:431583088241:web:74e0e34ea1e3e1170c55d0",
+  measurementId:"G-T372YXDF8D"
+};
+
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+
+const NATURAL=[
+  {name:"도",semi:0},{name:"레",semi:2},{name:"미",semi:4},{name:"파",semi:5},
+  {name:"솔",semi:7},{name:"라",semi:9},{name:"시",semi:11}
 ];
+const SEMI_NAMES=["도","도♯","레","레♯","미","파","파♯","솔","솔♯","라","라♯","시"];
+const COLORS=["c0","c1","c2","c3"];
 
-const SEMI_NAMES = ["도","도♯","레","레♯","미","파","파♯","솔","솔♯","라","라♯","시"];
-const COLORS = ["c0","c1","c2","c3"];
-
-let players=[];
-let current=0;
-let drawn=null;
+let roomCode="";
+let roomRef=null;
+let unsubscribe=null;
+let clientId=localStorage.getItem("formwheel_piano_client_id");
+if(!clientId){
+  clientId=Math.random().toString(36).slice(2)+Date.now().toString(36);
+  localStorage.setItem("formwheel_piano_client_id",clientId);
+}
+let myName="";
+let roomData=null;
 let selectedPiece=0;
-let itemQueue=[];
 
-function goHome(){
-  location.href="https://semicolonxss.github.io/Formwheel/";
+window.goHome=()=>location.href="https://semicolonxss.github.io/Formwheel/";
+window.createRoom=createRoom;
+window.joinRoom=joinRoom;
+window.hostStartGame=hostStartGame;
+window.leaveRoom=leaveRoom;
+window.copyRoomCode=copyRoomCode;
+window.drawNote=drawNote;
+window.toggleItem=toggleItem;
+window.selectPiece=selectPiece;
+window.moveSelected=moveSelected;
+
+function makeCode(){
+  return String(Math.floor(1000+Math.random()*9000));
 }
 
-function renderNames(){
-  const n=Number(document.getElementById("playerCount").value);
-  let out="";
-  for(let i=0;i<n;i++){
-    out += `<label>플레이어 ${i+1} 이름</label>
-            <input id="pname${i}" maxlength="12" placeholder="플레이어 ${i+1}">`;
+function makePlayer(name){
+  return {
+    id:clientId,
+    name:(name||"플레이어").trim().slice(0,12),
+    sharp:0,
+    flat:0,
+    pieces:[{pos:0,done:false},{pos:0,done:false},{pos:0,done:false},{pos:0,done:false}]
+  };
+}
+
+function initialState(players){
+  return {
+    phase:"lobby",
+    hostId:players[0].id,
+    current:0,
+    drawn:null,
+    selectedPiece:0,
+    itemQueue:[],
+    players,
+    winner:null,
+    logs:[`${players[0].name}이 방을 만들었습니다.`]
+  };
+}
+
+async function createRoom(){
+  clearError();
+  myName=(document.getElementById("myName").value.trim()||"플레이어 1").slice(0,12);
+  let code="";
+  for(let i=0;i<20;i++){
+    const c=makeCode();
+    const snap=await get(ref(db,"pianoRooms/"+c));
+    if(!snap.exists()){code=c;break;}
   }
-  document.getElementById("names").innerHTML=out;
+  if(!code){showError("방을 만들 수 없습니다. 잠시 후 다시 시도해주세요.");return}
+  roomCode=code;
+  roomRef=ref(db,"pianoRooms/"+roomCode);
+  await set(roomRef,initialState([makePlayer(myName)]));
+  openListener();
+  showLobby();
 }
-renderNames();
 
-function startGame(){
-  const n=Number(document.getElementById("playerCount").value);
-  players=[];
-  for(let i=0;i<n;i++){
-    players.push({
-      name:document.getElementById("pname"+i).value.trim() || `플레이어 ${i+1}`,
-      sharp:0,
-      flat:0,
-      pieces:[
-        {pos:0,done:false},
-        {pos:0,done:false},
-        {pos:0,done:false},
-        {pos:0,done:false}
-      ]
+async function joinRoom(){
+  clearError();
+  myName=(document.getElementById("myName").value.trim()||"플레이어").slice(0,12);
+  const code=document.getElementById("joinCode").value.trim();
+  if(!/^\d{4}$/.test(code)){showError("4자리 방 코드를 입력해주세요.");return}
+  const r=ref(db,"pianoRooms/"+code);
+  const snap=await get(r);
+  if(!snap.exists()){showError("존재하지 않는 방입니다.");return}
+  const data=snap.val();
+  if(data.phase!=="lobby"){showError("이미 시작된 게임입니다.");return}
+  if((data.players||[]).length>=4){showError("방이 가득 찼습니다. 최대 4명입니다.");return}
+  roomCode=code;roomRef=r;
+  const player=makePlayer(myName);
+  await runTransaction(roomRef,current=>{
+    if(!current||current.phase!=="lobby") return;
+    current.players=current.players||[];
+    if(current.players.length>=4) return;
+    if(current.players.some(p=>p.id===clientId)) return current;
+    current.players.push(player);
+    current.logs=current.logs||[];
+    current.logs.push(`${player.name}이 방에 참가했습니다.`);
+    return current;
+  });
+  openListener();
+  showLobby();
+}
+
+function openListener(){
+  if(unsubscribe) unsubscribe();
+  unsubscribe=onValue(roomRef,snap=>{
+    roomData=snap.val();
+    if(!roomData){showError("방이 삭제되었습니다.");return}
+    if(roomData.phase==="lobby") showLobby();
+    else {
+      showGame();
+      if(roomData.winner) showWinner(roomData.winner);
+    }
+    updateUI();
+  });
+}
+
+function showLobby(){
+  document.getElementById("roomMenu").style.display="none";
+  document.getElementById("lobby").style.display="block";
+  document.getElementById("setup").style.display="block";
+  document.getElementById("lobbyCode").textContent=roomCode||"----";
+  renderLobbyPlayers();
+}
+
+function renderLobbyPlayers(){
+  if(!roomData)return;
+  const el=document.getElementById("waitingPlayers");
+  el.innerHTML=(roomData.players||[]).map((p,i)=>
+    `<div class="waitPlayer">${i===0?"👑 ":""}${escapeHtml(p.name)}${p.id===clientId?" (나)":""}</div>`
+  ).join("");
+  const host=roomData.hostId===clientId;
+  const btn=document.getElementById("startGameBtn");
+  btn.style.display=host?"block":"none";
+  btn.disabled=(roomData.players||[]).length<2;
+  btn.textContent=(roomData.players||[]).length<2?"👥 2명 이상 필요":"🎮 게임 시작";
+}
+
+async function hostStartGame(){
+  if(!roomData||roomData.hostId!==clientId)return;
+  await runTransaction(roomRef,current=>{
+    if(!current||current.hostId!==clientId||current.phase!=="lobby")return;
+    if((current.players||[]).length<2)return;
+    current.phase="game";
+    current.current=0;
+    current.drawn=null;
+    current.selectedPiece=0;
+    current.itemQueue=[];
+    current.logs=current.logs||[];
+    current.logs.push("🎵 게임이 시작되었습니다!");
+    return current;
+  });
+}
+
+async function leaveRoom(){
+  if(!roomRef){location.reload();return}
+  try{
+    await runTransaction(roomRef,current=>{
+      if(!current)return;
+      current.players=(current.players||[]).filter(p=>p.id!==clientId);
+      if(current.players.length===0)return null;
+      if(current.hostId===clientId){
+        current.hostId=current.players[0].id;
+        current.logs=current.logs||[];
+        current.logs.push(`${current.players[0].name}이 새 호스트가 되었습니다.`);
+      }
+      return current;
     });
-  }
+  }catch(e){}
+  location.reload();
+}
+
+function showGame(){
   document.getElementById("setup").style.display="none";
   document.getElementById("game").style.display="block";
+  document.getElementById("gameRoomCode").textContent=roomCode;
   buildBoard();
-  update();
-  log(`${players[0].name}부터 시작합니다.`);
+}
+
+async function copyRoomCode(){
+  try{
+    await navigator.clipboard.writeText(roomCode);
+    alert("방 코드가 복사되었습니다: "+roomCode);
+  }catch(e){
+    alert("방 코드: "+roomCode);
+  }
+}
+
+function updateUI(){
+  if(!roomData)return;
+  if(roomData.phase==="lobby"){renderLobbyPlayers();return}
+
+  const players=roomData.players||[];
+  const current=roomData.current||0;
+  const meIndex=players.findIndex(p=>p.id===clientId);
+  const isMyTurn=meIndex===current;
+  const drawn=roomData.drawn;
+  const queue=roomData.itemQueue||[];
+
+  const status=document.getElementById("status");
+  status.innerHTML=players.map((p,i)=>{
+    const done=(p.pieces||[]).filter(x=>x.done).length;
+    return `<div class="player ${i===current?"active":""}">
+      <div class="name">${escapeHtml(p.name)}${p.id===clientId?" · 나":""}</div>
+      <div class="meta">통과 ${done}/4 · # ${p.sharp||0} · ♭ ${p.flat||0}</div>
+    </div>`;
+  }).join("");
+
+  document.getElementById("turnName").textContent=players[current]?.name||"-";
+  document.getElementById("sharpCount").textContent=players[meIndex]?.sharp||0;
+  document.getElementById("flatCount").textContent=players[meIndex]?.flat||0;
+  document.getElementById("drawCard").textContent=drawn?.name||"?";
+
+  const row=document.getElementById("pieceRow");
+  if(meIndex>=0){
+    row.innerHTML=(players[meIndex].pieces||[]).map((p,i)=>{
+      const text=p.done?"✓ 통과":`말 ${i+1} · ${p.pos}칸`;
+      return `<button class="pieceBtn ${i===selectedPiece?"active":""} ${p.done?"done":""}" onclick="selectPiece(${i})" ${(!isMyTurn||p.done)?"disabled":""}>${text}</button>`;
+    }).join("");
+  }
+
+  const canAct=isMyTurn&&!roomData.winner;
+  document.getElementById("drawBtn").disabled=!(canAct&&drawn===null);
+  document.getElementById("sharpBtn").disabled=!(canAct&&drawn!==null&&(players[meIndex]?.sharp||0)>0);
+  document.getElementById("flatBtn").disabled=!(canAct&&drawn!==null&&(players[meIndex]?.flat||0)>0);
+  document.getElementById("sharpBtn").classList.toggle("selected",queue.includes("#"));
+  document.getElementById("flatBtn").classList.toggle("selected",queue.includes("b"));
+  document.getElementById("moveBtn").disabled=!(canAct&&drawn!==null);
+
+  const notice=document.getElementById("notice");
+  if(roomData.winner) notice.textContent="게임 종료";
+  else if(!isMyTurn) notice.textContent=`${players[current]?.name||"상대"}의 차례입니다.`;
+  else if(drawn===null) notice.textContent="계이름 카드를 뽑아주세요.";
+  else notice.textContent=`${drawn.name}에 도착하도록 이동합니다. 필요하면 # 또는 ♭를 사용하세요.`;
+
+  renderTokens();
+  renderLogs();
+  highlightTarget();
+}
+
+function renderLogs(){
+  const logs=roomData.logs||[];
+  document.getElementById("log").innerHTML=logs.slice(-80).map(x=>`<div>• ${escapeHtml(x)}</div>`).join("");
+  const el=document.getElementById("log");
+  el.scrollTop=el.scrollHeight;
 }
 
 function buildBoard(){
@@ -235,47 +470,17 @@ function buildBoard(){
   }
 }
 
-function update(){
-  const status=document.getElementById("status");
-  status.innerHTML=players.map((p,i)=>{
-    const done=p.pieces.filter(x=>x.done).length;
-    return `<div class="player ${i===current?"active":""}">
-      <div class="name">${escapeHtml(p.name)}</div>
-      <div class="meta">통과 ${done}/4 · # ${p.sharp} · ♭ ${p.flat}</div>
-    </div>`;
-  }).join("");
-
-  document.getElementById("turnName").textContent=players[current].name;
-  document.getElementById("sharpCount").textContent=players[current].sharp;
-  document.getElementById("flatCount").textContent=players[current].flat;
-
-  const row=document.getElementById("pieceRow");
-  row.innerHTML=players[current].pieces.map((p,i)=>{
-    let text=p.done?"✓ 통과":`말 ${i+1} · ${p.pos}칸`;
-    return `<button class="pieceBtn ${i===selectedPiece?"active":""} ${p.done?"done":""}" onclick="selectPiece(${i})">${text}</button>`;
-  }).join("");
-
-  document.getElementById("sharpBtn").classList.toggle("selected",itemQueue.includes("#"));
-  document.getElementById("flatBtn").classList.toggle("selected",itemQueue.includes("b"));
-
-  renderTokens();
-}
-
 function renderTokens(){
   document.querySelectorAll(".token-stack").forEach(x=>x.remove());
-
+  const players=roomData?.players||[];
   players.forEach((p,pi)=>{
-    p.pieces.forEach((piece,idx)=>{
-      if(piece.done) return;
-      const semi=piece.pos%12;
-      const key=document.getElementById("key"+semi);
-      if(!key) return;
-
+    (p.pieces||[]).forEach((piece,idx)=>{
+      if(piece.done)return;
+      const semi=((piece.pos%12)+12)%12;
       const a=(semi/12)*Math.PI*2-Math.PI/2;
       const r=42;
       const x=50+Math.cos(a)*r;
       const y=50+Math.sin(a)*r;
-
       let stack=document.querySelector(`.stack-${semi}`);
       if(!stack){
         stack=document.createElement("div");
@@ -284,7 +489,6 @@ function renderTokens(){
         stack.style.top=y+"%";
         document.querySelector(".boardArea").appendChild(stack);
       }
-
       const t=document.createElement("div");
       t.className=`token ${COLORS[pi]}`;
       t.title=`${p.name} 말 ${idx+1}`;
@@ -294,201 +498,172 @@ function renderTokens(){
   });
 }
 
-function drawNote(){
-  if(drawn!==null){
-    log("이미 계이름 카드를 뽑았습니다.");
-    return;
-  }
-  drawn=NATURAL[Math.floor(Math.random()*NATURAL.length)];
-  document.getElementById("drawCard").textContent=drawn.name;
-  document.getElementById("drawBtn").disabled=true;
-  selectedPiece=findAvailablePiece();
-  document.getElementById("notice").textContent=`${drawn.name}에 도착하도록 이동합니다. 필요하면 # 또는 ♭를 사용하세요.`;
-  update();
-  highlightTarget();
-  log(`${players[current].name} → ${drawn.name} 카드`);
-}
-
-function findAvailablePiece(){
-  const arr=players[current].pieces;
-  const i=arr.findIndex(p=>!p.done);
-  return i<0?0:i;
-}
-
-function selectPiece(i){
-  if(players[current].pieces[i].done){
-    log("이미 통과한 말입니다.");
-    return;
-  }
-  selectedPiece=i;
-  update();
-  highlightTarget();
-}
-
-function toggleItem(type){
-  if(drawn===null){
-    log("먼저 계이름 카드를 뽑아주세요.");
-    return;
-  }
-  const p=players[current];
-  const count=type==="#"?p.sharp:p.flat;
-
-  if(count<=0){
-    log(`${type==="#"?"#":"♭"} 카드가 없습니다.`);
-    return;
-  }
-
-  const index=itemQueue.indexOf(type);
-  if(index>=0){
-    itemQueue.splice(index,1);
-  }else{
-    itemQueue.push(type);
-  }
-  update();
-  highlightTarget();
-}
-
 function targetSemi(){
-  if(drawn===null) return null;
+  const drawn=roomData?.drawn;
+  if(!drawn)return null;
   let s=drawn.semi;
-  for(const item of itemQueue){
-    s += item==="#"?1:-1;
-  }
-  s=((s%12)+12)%12;
-  return s;
+  for(const item of (roomData.itemQueue||[]))s+=item==="#"?1:-1;
+  return ((s%12)+12)%12;
 }
 
 function nextDestination(pos,target){
   let delta=(target-(pos%12)+12)%12;
-  if(delta===0) delta=12;
+  if(delta===0)delta=12;
   return pos+delta;
 }
 
 function highlightTarget(){
   document.querySelectorAll(".key").forEach(k=>k.classList.remove("target"));
   const t=targetSemi();
-  if(t!==null) document.getElementById("key"+t)?.classList.add("target");
+  if(t!==null)document.getElementById("key"+t)?.classList.add("target");
 }
 
-function moveSelected(){
-  if(drawn===null){
-    log("먼저 계이름 카드를 뽑아주세요.");
-    return;
-  }
-
-  const p=players[current];
-  const piece=p.pieces[selectedPiece];
-
-  if(piece.done){
-    log("이미 통과한 말입니다.");
-    return;
-  }
-
-  const dest=nextDestination(piece.pos,targetSemi());
-  const passedDo=Math.floor(dest/12)>Math.floor(piece.pos/12);
-
-  if(passedDo){
-    p.sharp++;
-    log(`${p.name}이(가) 도를 지나 아이템 카드 1장을 얻었습니다. (# +1)`);
-  }
-
-  piece.pos=dest;
-
-  // 선택한 아이템 실제 소모
-  for(const item of itemQueue){
-    if(item==="#") p.sharp--;
-    else p.flat--;
-  }
-
-  // 상대가 같은 칸에 있으면 1옥타브(12반음) 뒤로
-  players.forEach((op,oi)=>{
-    if(oi===current) return;
-    op.pieces.forEach((other,oj)=>{
-      if(other.done) return;
-      if(other.pos===piece.pos){
-        other.pos=Math.max(0,other.pos-12);
-        log(`⚔️ ${p.name}이(가) ${op.name}의 말 ${oj+1}과 충돌! 상대 말이 1옥타브 뒤로 이동합니다.`);
-      }
-    });
+async function drawNote(){
+  if(!roomData)return;
+  const players=roomData.players||[];
+  const me=players.findIndex(p=>p.id===clientId);
+  if(me<0||me!==(roomData.current||0)||roomData.drawn)return;
+  await runTransaction(roomRef,current=>{
+    if(!current)return;
+    if(current.current!==me||current.drawn)return;
+    const card=NATURAL[Math.floor(Math.random()*NATURAL.length)];
+    current.drawn=card;
+    current.selectedPiece=(current.players[me].pieces||[]).findIndex(p=>!p.done);
+    if(current.selectedPiece<0)current.selectedPiece=0;
+    current.itemQueue=[];
+    current.logs=current.logs||[];
+    current.logs.push(`${current.players[me].name} → ${card.name} 카드`);
+    return current;
   });
+}
 
-  // 시작 칸에 도착하거나 지나가면 통과
-  if(piece.pos>=12){
-    piece.done=true;
-    piece.pos=12;
-    log(`🏁 ${p.name}의 말 ${selectedPiece+1}이(가) 통과했습니다!`);
+async function toggleItem(type){
+  if(!roomData?.drawn)return;
+  const players=roomData.players||[];
+  const me=players.findIndex(p=>p.id===clientId);
+  if(me<0||me!==(roomData.current||0))return;
+  await runTransaction(roomRef,current=>{
+    if(!current||current.current!==me||!current.drawn)return;
+    const p=current.players[me];
+    const count=type==="#"?(p.sharp||0):(p.flat||0);
+    if(count<=0)return current;
+    current.itemQueue=current.itemQueue||[];
+    const idx=current.itemQueue.indexOf(type);
+    if(idx>=0)current.itemQueue.splice(idx,1);
+    else current.itemQueue.push(type);
+    return current;
+  });
+}
 
-    if(p.pieces.every(x=>x.done)){
-      win(p.name);
-      return;
+function selectPiece(i){
+  if(!roomData)return;
+  const players=roomData.players||[];
+  const me=players.findIndex(p=>p.id===clientId);
+  if(me<0||me!==(roomData.current||0))return;
+  if(players[me].pieces[i]?.done)return;
+  selectedPiece=i;
+  updateUI();
+}
+
+async function moveSelected(){
+  if(!roomData?.drawn)return;
+  const players=roomData.players||[];
+  const me=players.findIndex(p=>p.id===clientId);
+  if(me<0||me!==(roomData.current||0))return;
+
+  await runTransaction(roomRef,current=>{
+    if(!current||current.current!==me||!current.drawn||current.winner)return;
+    const p=current.players[me];
+    const piece=p.pieces[current.selectedPiece];
+    if(!piece||piece.done)return current;
+
+    const queue=current.itemQueue||[];
+    for(const item of queue){
+      if(item==="#" && (p.sharp||0)<=0)return current;
+      if(item==="b" && (p.flat||0)<=0)return current;
     }
 
-    // 다음 말을 자동 선택
-    const next=p.pieces.findIndex(x=>!x.done);
-    if(next>=0) selectedPiece=next;
-  }
+    let target=current.drawn.semi;
+    for(const item of queue)target+=item==="#"?1:-1;
+    target=((target%12)+12)%12;
 
-  const used=itemQueue.length;
-  if(used) log(`${used}개의 아이템을 사용했습니다.`);
+    const dest=nextDestination(piece.pos,target);
+    const passedDo=Math.floor(dest/12)>Math.floor(piece.pos/12);
 
-  itemQueue=[];
-  drawn=null;
-  document.getElementById("drawCard").textContent="?";
-  document.getElementById("drawBtn").disabled=false;
-  document.getElementById("notice").textContent="다음 플레이어의 차례입니다.";
+    if(passedDo){
+      p.sharp=(p.sharp||0)+1;
+      current.logs=current.logs||[];
+      current.logs.push(`${p.name}이(가) 도를 지나 아이템 카드 1장을 얻었습니다. (# +1)`);
+    }
 
-  current=(current+1)%players.length;
-  update();
+    piece.pos=dest;
+
+    for(const item of queue){
+      if(item==="#")p.sharp=Math.max(0,(p.sharp||0)-1);
+      else p.flat=Math.max(0,(p.flat||0)-1);
+    }
+
+    current.logs=current.logs||[];
+
+    current.players.forEach((op,oi)=>{
+      if(oi===me)return;
+      (op.pieces||[]).forEach((other,oj)=>{
+        if(other.done)return;
+        if(other.pos===piece.pos){
+          other.pos=Math.max(0,other.pos-12);
+          current.logs.push(`⚔️ ${p.name}이(가) ${op.name}의 말 ${oj+1}과 충돌! 상대 말이 1옥타브 뒤로 이동합니다.`);
+        }
+      });
+    });
+
+    if(piece.pos>=12){
+      piece.done=true;
+      piece.pos=12;
+      current.logs.push(`🏁 ${p.name}의 말 ${current.selectedPiece+1}이(가) 통과했습니다!`);
+      if(p.pieces.every(x=>x.done)){
+        current.winner=p.name;
+        current.phase="finished";
+        current.logs.push(`🎉 ${p.name}이(가) 네 개의 말을 모두 통과시켰습니다!`);
+        current.drawn=null;
+        current.itemQueue=[];
+        return current;
+      }
+      const next=p.pieces.findIndex(x=>!x.done);
+      if(next>=0)current.selectedPiece=next;
+    }
+
+    if(queue.length)current.logs.push(`${queue.length}개의 아이템을 사용했습니다.`);
+
+    current.drawn=null;
+    current.itemQueue=[];
+    current.current=(current.current+1)%current.players.length;
+    current.logs.push(`${current.players[current.current].name}의 차례입니다.`);
+    return current;
+  });
 }
 
-function win(name){
-  update();
+function showWinner(name){
   document.getElementById("winTitle").textContent="🎉 승리!";
   document.getElementById("winText").textContent=`${name}이(가) 네 개의 말을 모두 통과시켰습니다!`;
   document.getElementById("modal").style.display="flex";
-  document.getElementById("drawBtn").disabled=true;
-  document.getElementById("notice").textContent="게임 종료";
 }
 
-function log(text){
-  const el=document.getElementById("log");
-  el.innerHTML += `<div>• ${escapeHtml(text)}</div>`;
-  el.scrollTop=el.scrollHeight;
+function showError(text){
+  const el=document.getElementById("error");
+  el.textContent=text;el.style.display="block";
 }
-
+function clearError(){document.getElementById("error").style.display="none"}
 function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g,m=>({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-  }[m]));
+  return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 }
 
-// 이동 버튼은 말 선택 후 화면 아래에 별도 버튼 없이,
-// 말 선택 시 보드 아래에 "이동" 버튼을 생성한다.
-const originalSelectPiece=selectPiece;
-selectPiece=function(i){
-  originalSelectPiece(i);
-  updateMoveButton();
-};
+window.addEventListener("beforeunload",()=>{
+  // 방 데이터는 다른 참가자에게 게임 기록을 남기기 위해 자동 삭제하지 않습니다.
+});
 
-function updateMoveButton(){
-  let b=document.getElementById("moveBtn");
-  if(!b){
-    b=document.createElement("button");
-    b.id="moveBtn";
-    b.style.cssText="width:100%;margin-top:10px;padding:13px;border-radius:12px;background:#7c3aed;color:white;font-weight:900";
-    b.onclick=moveSelected;
-    document.getElementById("pieceRow").parentElement.appendChild(b);
-  }
-  b.textContent=drawn===null?"이동하려면 먼저 계이름 카드를 뽑으세요":"🎵 선택한 말 이동하기";
-  b.disabled=drawn===null;
-}
-
-// draw 후에도 이동 버튼 상태 갱신
-const oldDraw=drawNote;
-drawNote=function(){
-  oldDraw();
-  updateMoveButton();
-};
+const params=new URLSearchParams(location.search);
+const autoCode=params.get("room");
+if(autoCode)document.getElementById("joinCode").value=autoCode;
 </script>
 </body>
 </html>
