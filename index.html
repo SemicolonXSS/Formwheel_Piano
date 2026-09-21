@@ -8,7 +8,7 @@
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f7f8fc;color:#171923}
-button,input,select{font:inherit}
+button,input,select,textarea{font:inherit}
 button{cursor:pointer;border:0}
 button:disabled{cursor:not-allowed}
 .header{position:sticky;top:0;z-index:20;height:68px;padding:0 22px;display:flex;align-items:center;background:rgba(255,255,255,.9);backdrop-filter:blur(14px);border-bottom:1px solid #e6e8ee}
@@ -21,7 +21,8 @@ button:disabled{cursor:not-allowed}
 h1{margin:0;font-size:32px;letter-spacing:-1.5px}
 .sub{color:#6b7280;margin:7px 0 22px}
 label{display:block;font-weight:800;margin:15px 0 7px}
-input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius:12px;background:#fff}
+input,select,textarea{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius:12px;background:#fff}
+textarea{resize:vertical;min-height:64px}
 .primary{width:100%;margin-top:14px;padding:14px;border-radius:13px;background:#7c3aed;color:#fff;font-weight:900}
 .primary:disabled{opacity:.5}
 .secondary{width:100%;margin-top:10px;padding:13px;border-radius:13px;background:#111827;color:#fff;font-weight:900}
@@ -78,6 +79,7 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
 .moveBtn:disabled{opacity:.45}
 .notice{margin-top:12px;padding:13px 15px;border-radius:13px;background:#fafafa;border:1px solid #e5e7eb;font-size:14px;line-height:1.5}
 .log{margin-top:14px;padding:14px;background:#111827;color:#e5e7eb;border-radius:15px;height:150px;overflow:auto;font-size:13px;line-height:1.6}
+.rulesBar{display:none;margin-bottom:14px;padding:11px 14px;border-radius:14px;background:#f7f5ff;border:1px solid #e8e0ff;color:#4c1d95;font-size:13px;line-height:1.65}
 .roomBar{margin-bottom:14px;padding:12px 15px;background:#fff;border:1px solid #e5e7eb;border-radius:15px;display:flex;justify-content:space-between;align-items:center;gap:10px}
 .roomBar b{letter-spacing:2px;color:#6d28d9}
 .smallBtn{padding:8px 11px;border-radius:9px;background:#f3f4f6;font-weight:800}
@@ -86,6 +88,7 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
 .modalBox h2{font-size:32px;margin:0 0 8px}
 .modalBox p{color:#6b7280}
 .modalBox button{padding:13px 20px;border-radius:12px;background:#7c3aed;color:#fff;font-weight:900}
+.modalBox button.ghostBtn{background:#f3f4f6;color:#111827}
 .settingsBox{width:min(94vw,540px);max-height:88vh;overflow:auto;text-align:left;padding:24px}
 .settingsBox h2{font-size:24px;margin:0 0 2px}
 .settingsBox .desc{color:#6b7280;font-size:13px;margin:0 0 4px}
@@ -168,6 +171,7 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
       <div>방 코드 <b id="gameRoomCode">----</b></div>
       <button class="smallBtn" onclick="copyRoomCode()">코드 복사</button>
     </div>
+    <div id="rulesBar" class="rulesBar"></div>
     <div id="status" class="status"></div>
 
     <section class="panel boardPanel">
@@ -195,7 +199,7 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
         <div id="itemRow" class="itemRow"></div>
         <div class="itemInfo">
           # · ♭ · ⏭ 는 이번 이동에 쓸 만큼 눌러 선택합니다(보유 수만큼 누르면 해제).
-          🎲는 누르면 바로 카드를 다시 뽑고, 🛡는 충돌할 때 자동으로 사용됩니다.
+          🎲는 누르면 바로 카드를 다시 뽑습니다. 🛡는 충돌했을 때 쓸지 말지 고르거나(설정에 따라) 자동으로 사용됩니다.
         </div>
       </section>
     </div>
@@ -216,6 +220,19 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
     <h2 id="winTitle">🎉 승리!</h2>
     <p id="winText"></p>
     <button onclick="location.reload()">다시 하기</button>
+  </div>
+</div>
+
+<!-- 방어 카드 사용 여부 -->
+<div id="shieldModal" class="modal">
+  <div class="modalBox">
+    <h2>🛡 방어할까요?</h2>
+    <p id="shieldText"></p>
+    <div style="display:grid;gap:8px">
+      <button onclick="respondShield(true)">🛡 방어 카드 사용</button>
+      <button class="ghostBtn" onclick="respondShield(false)">사용하지 않고 밀려나기</button>
+    </div>
+    <p id="shieldTimer" style="font-size:12px;margin-bottom:0"></p>
   </div>
 </div>
 
@@ -253,6 +270,21 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
       <select id="set_reward"></select>
     </div>
     <div id="set_items"></div>
+    <div class="setRow">
+      <div class="lbl">🛡 방어 사용 방식<small>충돌했을 때 방어 카드를 쓰는 방법</small></div>
+      <select id="set_shield"></select>
+    </div>
+    <div class="setRow">
+      <div class="lbl">이동당 아이템 사용 한도<small>한 번 이동할 때 쓸 수 있는 아이템 수</small></div>
+      <select id="set_limit"></select>
+    </div>
+
+    <div class="setSection">✨ 특별 룰</div>
+    <div id="set_rules"></div>
+
+    <div class="setSection">📝 방 규칙 메모</div>
+    <div class="desc">자유롭게 적으면 모든 참가자에게 보입니다. (게임에 자동 적용되지는 않습니다)</div>
+    <textarea id="set_memo" maxlength="200" placeholder="예: 충돌당하면 벌칙 노래 한 소절!" style="margin-top:8px"></textarea>
 
     <div class="setBtns">
       <button class="save" onclick="saveSettings()">💾 저장</button>
@@ -323,6 +355,16 @@ const ITEM_TYPES=[
   {key:"again",label:"⏭",name:"한 번 더",desc:"이번 이동 후 한 번 더 내 차례가 됩니다. (이동당 1장)",def:false}
 ];
 const QUEUE_ITEM={"#":"sharp","b":"flat","again":"again"};
+const SHARP_PCS=[1,3,6,8,10];
+
+/* 특별 룰 (방장이 켜고 끔) */
+const RULE_TYPES=[
+  {key:"safeDo",label:"🏠",name:"도 칸은 안전지대",desc:"도 칸에 도착하면 충돌이 일어나지 않아, 상대 말과 같은 칸을 함께 쓸 수 있습니다."},
+  {key:"semitoneBonus",label:"🎹",name:"반음 칸 보너스",desc:"반음(♯) 칸에 도착하면 아이템 1장을 얻습니다. (아이템을 사용 중일 때)"},
+  {key:"hitReward",label:"💥",name:"충돌 보상",desc:"충돌로 상대 말을 밀어내면 아이템 1장을 얻습니다. (아이템을 사용 중일 때)"},
+  {key:"sameNoteAgain",label:"🔁",name:"같은 음 연속 보너스",desc:"바로 전 차례와 같은 계이름 카드를 뽑아 이동하면 한 번 더 진행합니다."},
+  {key:"exactFinish",label:"🎯",name:"정확히 도착해야 통과",desc:"시작 칸을 지나치는 이동은 할 수 없고, 정확히 도착해야 통과합니다. 움직일 수 있는 말이 없으면 차례가 넘어갑니다."}
+];
 
 /* ---------- 게임 설정 ---------- */
 function normalizeSettings(raw){
@@ -337,7 +379,11 @@ function normalizeSettings(raw){
     cardRange:r.cardRange==="all"?"all":"natural",
     collisionBack:clamp(r.collisionBack,0,2,1),
     passReward:clamp(r.passReward,0,3,1),
+    itemLimit:clamp(r.itemLimit,0,3,0),
+    shieldMode:r.shieldMode==="auto"?"auto":"ask",
+    houseRules:String(r.houseRules||"").slice(0,200),
     goal:0,
+    rules:{},
     itemsOn:{},
     itemsStart:{}
   };
@@ -347,6 +393,9 @@ function normalizeSettings(raw){
     const on=r.itemsOn&&r.itemsOn[t.key]!==undefined?!!r.itemsOn[t.key]:t.def;
     cfg.itemsOn[t.key]=on;
     cfg.itemsStart[t.key]=clamp(r.itemsStart&&r.itemsStart[t.key],0,5,0);
+  });
+  RULE_TYPES.forEach(t=>{
+    cfg.rules[t.key]=!!(r.rules&&r.rules[t.key]);
   });
   return cfg;
 }
@@ -444,6 +493,8 @@ function normalize(d){
   d.drawn=d.drawn||null;
   d.winner=d.winner||null;
   d.current=d.current||0;
+  d.pending=d.pending||null;
+  if(d.pending)d.pending.victims=toArray(d.pending.victims);
   return d;
 }
 
@@ -465,6 +516,7 @@ function makePlayer(name){
     id:clientId,
     name:(name||"플레이어").trim().slice(0,12),
     items:zeroItems(),
+    lastSemi:-1,
     pieces:range(1,DEFAULT_SETTINGS.pieces).map(()=>({pos:0,done:false}))
   };
 }
@@ -486,6 +538,35 @@ function initialState(players){
 function drawCard(cfg){
   const pool=cfg.cardRange==="all"?ALL_NOTES:NATURAL;
   return pool[Math.floor(Math.random()*pool.length)];
+}
+
+/* 아이템 지급 (사용 중인 아이템 중 무작위) */
+function grantItems(current,p,n,why){
+  const pool=ITEM_TYPES.filter(t=>current.settings.itemsOn[t.key]);
+  if(!pool.length||n<=0)return;
+  const got=[];
+  for(let k=0;k<n;k++){
+    const t=pool[Math.floor(Math.random()*pool.length)];
+    p.items[t.key]+=1;
+    got.push(`${t.label} ${t.name}`);
+  }
+  current.logs.push(`${p.name}이(가) ${why} 아이템을 얻었습니다: ${got.join(", ")}`);
+}
+
+/* 충돌로 상대 말 밀어내기 */
+function knockback(current,byIdx,oi,oj){
+  const cfg=current.settings;
+  const by=current.players[byIdx];
+  const op=current.players[oi];
+  const other=op.pieces[oj];
+  other.pos=Math.max(0,other.pos-12*cfg.collisionBack);
+  current.logs.push(`⚔️ ${by.name}이(가) ${op.name}의 말 ${oj+1}과 충돌! 상대 말이 ${cfg.collisionBack}옥타브 뒤로 이동합니다.`);
+  if(cfg.rules.hitReward)grantItems(current,by,1,"충돌 보상으로");
+}
+
+function advanceTurn(current){
+  current.current=(current.current+1)%current.players.length;
+  current.logs.push(`${current.players[current.current].name}의 차례입니다.`);
 }
 
 function setBusy(v){
@@ -615,11 +696,17 @@ function settingsSummaryHtml(c){
   const items=on.length
     ? on.map(t=>`${t.label} ${t.name}${c.itemsStart[t.key]?` (시작 ${c.itemsStart[t.key]}장)`:""}`).join(" · ")
     : "없음";
-  return `<b>⚙️ 게임 설정</b><br>`
+  const rules=RULE_TYPES.filter(r=>c.rules[r.key]).map(r=>`${r.label} ${r.name}`);
+  let h=`<b>⚙️ 게임 설정</b><br>`
     +`말 ${c.pieces}개 · ${c.goal?`${c.goal}개 통과하면 승리`:"전부 통과하면 승리"}<br>`
     +`판 ${c.octaves}옥타브 (${c.octaves*12}칸) · 카드 ${c.cardRange==="all"?"반음 포함 12개":"자연음 7개"}<br>`
     +`충돌 ${c.collisionBack?`${c.collisionBack}옥타브 뒤로`:"페널티 없음"} · 도 통과 보상 ${c.passReward?`${c.passReward}장`:"없음"}<br>`
     +`아이템: ${items}`;
+  if(c.itemsOn.shield&&c.collisionBack>0)h+=`<br>🛡 방어: ${c.shieldMode==="auto"?"충돌 시 자동 사용":"충돌 시 직접 선택"}`;
+  h+=`<br>이동당 아이템: ${c.itemLimit?`${c.itemLimit}장까지`:"제한 없음"}`;
+  h+=`<br>✨ 특별 룰: ${rules.length?rules.join(" · "):"없음"}`;
+  if(c.houseRules)h+=`<br>📝 ${escapeHtml(c.houseRules)}`;
+  return h;
 }
 
 function renderLobbyPlayers(){
@@ -648,6 +735,7 @@ async function hostStartGame(){
       const cfg=current.settings;
       current.players.forEach(p=>{
         p.pieces=range(1,cfg.pieces).map(()=>({pos:0,done:false}));
+        p.lastSemi=-1;
         p.items=zeroItems();
         ITEM_TYPES.forEach(t=>{
           if(cfg.itemsOn[t.key])p.items[t.key]=cfg.itemsStart[t.key];
@@ -655,6 +743,7 @@ async function hostStartGame(){
       });
       current.phase="game";
       current.current=0;
+      current.pending=null;
       current.drawn=null;
       current.itemQueue=[];
       current.logs.push("🎵 게임이 시작되었습니다!");
@@ -706,6 +795,8 @@ function fillSettingsForm(c){
   fillSelect("set_cards",[["natural","자연음 7개 (도레미파솔라시)"],["all","반음 포함 12개"]],c.cardRange);
   fillSelect("set_collision",[[0,"페널티 없음"],[1,"1옥타브 뒤로"],[2,"2옥타브 뒤로"]],c.collisionBack);
   fillSelect("set_reward",range(0,3).map(n=>[n,n?`${n}장`:"없음"]),c.passReward);
+  fillSelect("set_shield",[["ask","충돌 시 직접 선택"],["auto","자동으로 사용"]],c.shieldMode);
+  fillSelect("set_limit",[[0,"제한 없음"],[1,"1장까지"],[2,"2장까지"],[3,"3장까지"]],c.itemLimit);
   document.getElementById("set_items").innerHTML=ITEM_TYPES.map(t=>`
     <div class="setItem">
       <div class="top">
@@ -714,6 +805,14 @@ function fillSettingsForm(c){
       </div>
       <small>${t.desc}</small>
     </div>`).join("");
+  document.getElementById("set_rules").innerHTML=RULE_TYPES.map(t=>`
+    <div class="setItem">
+      <div class="top">
+        <label class="chk"><input type="checkbox" id="rl_${t.key}" ${c.rules[t.key]?"checked":""}> ${t.label} ${t.name}</label>
+      </div>
+      <small>${t.desc}</small>
+    </div>`).join("");
+  document.getElementById("set_memo").value=c.houseRules||"";
 }
 
 function openSettings(){
@@ -738,9 +837,16 @@ async function saveSettings(){
     cardRange:val("set_cards"),
     collisionBack:Number(val("set_collision")),
     passReward:Number(val("set_reward")),
+    shieldMode:val("set_shield"),
+    itemLimit:Number(val("set_limit")),
+    houseRules:val("set_memo").trim(),
+    rules:{},
     itemsOn:{},
     itemsStart:{}
   };
+  RULE_TYPES.forEach(t=>{
+    raw.rules[t.key]=document.getElementById("rl_"+t.key).checked;
+  });
   ITEM_TYPES.forEach(t=>{
     raw.itemsOn[t.key]=document.getElementById("on_"+t.key).checked;
     raw.itemsStart[t.key]=Number(val("st_"+t.key));
@@ -801,16 +907,36 @@ function updateUI(){
   const isMyTurn=meIndex===current;
   const drawn=roomData.drawn;
   const queue=roomData.itemQueue;
+  const pd=roomData.pending;
   const me=players[meIndex];
   const enabledItems=ITEM_TYPES.filter(t=>cfg.itemsOn[t.key]);
+  const tgt=targetSemi();
+  const limit=cfg.itemLimit;
 
+  // 선택한 말 / 이동 가능 여부 (정확히 도착 룰)
+  let legalArr=[];
   if(me){
+    legalArr=me.pieces.map(pc=>pc.done?false:(!cfg.rules.exactFinish||tgt===null||nextDestination(pc.pos,tgt)<=TR));
     const sp=me.pieces[selectedPiece];
     if(!sp||sp.done){
       const f=me.pieces.findIndex(x=>!x.done);
       selectedPiece=f<0?0:f;
     }
+    if(drawn&&isMyTurn&&legalArr.some(Boolean)&&!legalArr[selectedPiece]){
+      selectedPiece=legalArr.findIndex(Boolean);
+    }
   }
+  const anyLegal=legalArr.some(Boolean);
+
+  // 규칙 표시줄
+  const bar=document.getElementById("rulesBar");
+  const parts=[];
+  const actRules=RULE_TYPES.filter(r=>cfg.rules[r.key]).map(r=>`${r.label} ${r.name}`);
+  if(actRules.length)parts.push("✨ 특별 룰: "+actRules.join(" · "));
+  if(limit)parts.push(`이동당 아이템 ${limit}장까지`);
+  if(cfg.houseRules)parts.push("📝 "+escapeHtml(cfg.houseRules));
+  bar.innerHTML=parts.join("<br>");
+  bar.style.display=parts.length?"block":"none";
 
   document.getElementById("status").innerHTML=players.map((p,i)=>{
     const done=p.pieces.filter(x=>x.done).length;
@@ -826,24 +952,26 @@ function updateUI(){
   document.getElementById("drawCard").textContent=drawn?.name||"?";
   document.getElementById("centerText").innerHTML=`FORMWHEEL<br>🎹<br><span style="font-size:.6em;color:#6b7280">${cfg.octaves}옥타브 · ${TR}칸</span>`;
 
-  const canAct=isMyTurn&&!roomData.winner;
+  const canAct=isMyTurn&&!roomData.winner&&!pd;
 
   // 아이템 카드
   const itemRow=document.getElementById("itemRow");
   if(!enabledItems.length){
     itemRow.innerHTML=`<div class="itemInfo" style="grid-column:1/-1">이번 게임에서는 아이템을 사용하지 않습니다.</div>`;
   }else{
+    const limitReached=limit>0&&queue.length>=limit;
     itemRow.innerHTML=enabledItems.map(t=>{
       const have=me?.items[t.key]||0;
       if(t.key==="shield"){
         return `<div class="itemBtn passive">${t.label} ${t.name} × ${have}</div>`;
       }
-      const dis=!(canAct&&drawn!==null&&have>0);
+      const base=!(canAct&&drawn!==null&&have>0);
       if(t.key==="reroll"){
-        return `<button class="itemBtn" onclick="useReroll()" ${dis?"disabled":""}>${t.label} ${t.name} × ${have}</button>`;
+        return `<button class="itemBtn" onclick="useReroll()" ${base?"disabled":""}>${t.label} ${t.name} × ${have}</button>`;
       }
       const type=t.key==="sharp"?"#":t.key==="flat"?"b":"again";
       const used=queue.filter(x=>x===type).length;
+      const dis=base||(limitReached&&!used);
       return `<button class="itemBtn ${used?"selected":""}" onclick="toggleItem('${type}')" ${dis?"disabled":""}>${t.label} ${t.name} × ${have}${used?` (사용 ${used})`:""}</button>`;
     }).join("");
   }
@@ -852,21 +980,38 @@ function updateUI(){
   const row=document.getElementById("pieceRow");
   if(me){
     row.innerHTML=me.pieces.map((p,i)=>{
-      const text=p.done?"✓ 통과":`말 ${i+1} · ${p.pos}/${TR}`;
-      return `<button class="pieceBtn ${i===selectedPiece&&!p.done?"active":""} ${p.done?"done":""}" onclick="selectPiece(${i})" ${(!isMyTurn||p.done)?"disabled":""}>${text}</button>`;
+      const blocked=!!drawn&&!p.done&&!legalArr[i];
+      const text=p.done?"✓ 통과":blocked?`말 ${i+1} · 🚫 도착 불가`:`말 ${i+1} · ${p.pos}/${TR}`;
+      const dis=!isMyTurn||p.done||blocked||!!pd;
+      return `<button class="pieceBtn ${i===selectedPiece&&!p.done?"active":""} ${p.done?"done":""}" onclick="selectPiece(${i})" ${dis?"disabled":""}>${text}</button>`;
     }).join("");
   }else{
     row.innerHTML="";
   }
 
   document.getElementById("drawBtn").disabled=!(canAct&&drawn===null);
-  document.getElementById("moveBtn").disabled=!(canAct&&drawn!==null);
+  const moveBtn=document.getElementById("moveBtn");
+  moveBtn.disabled=!(canAct&&drawn!==null);
+  moveBtn.textContent=(canAct&&drawn!==null&&!anyLegal)?"⏭ 움직일 수 있는 말이 없음 · 차례 넘기기":"🎵 선택한 말 이동하기";
+
+  // 방어 카드 선택 창
+  const sm=document.getElementById("shieldModal");
+  const v=pd&&pd.victims[0];
+  if(pd&&v&&v.p===meIndex&&me){
+    const atk=players[pd.by]?.name||"상대";
+    document.getElementById("shieldText").textContent=`${atk}이(가) 내 말 ${v.i+1}과 충돌했습니다! 방어 카드(보유 ${me.items.shield}장)를 사용할까요?`;
+    sm.style.display="flex";
+  }else{
+    sm.style.display="none";
+  }
 
   const notice=document.getElementById("notice");
   if(roomData.winner)notice.textContent="게임 종료";
+  else if(pd&&v)notice.textContent=`⏳ ${players[v.p]?.name||"상대"}이(가) 방어 카드 사용 여부를 정하고 있습니다...`;
   else if(meIndex<0)notice.textContent="관전 중입니다.";
   else if(!isMyTurn)notice.textContent=`${players[current]?.name||"상대"}의 차례입니다.`;
   else if(drawn===null)notice.textContent="계이름 카드를 뽑아주세요.";
+  else if(!anyLegal)notice.textContent=`${drawn.name}에 정확히 도착할 수 있는 말이 없습니다. 차례를 넘겨주세요.`;
   else notice.textContent=`${drawn.name}에 도착하도록 이동합니다. 필요하면 아이템을 사용하세요.`;
 
   renderTokens();
@@ -962,11 +1107,13 @@ function highlightTarget(){
     if(i%12===t)document.getElementById("key"+i)?.classList.add("soft");
   }
   const mi=myIndex();
-  if(mi>=0&&mi===roomData.current){
+  if(mi>=0&&mi===roomData.current&&!roomData.pending){
     const piece=roomData.players[mi].pieces[selectedPiece];
     if(piece&&!piece.done){
       const dest=nextDestination(piece.pos,t);
-      document.getElementById("key"+(dest>=TR?0:dest))?.classList.add("target");
+      if(!(roomData.settings.rules.exactFinish&&dest>TR)){
+        document.getElementById("key"+(dest>=TR?0:dest))?.classList.add("target");
+      }
     }
   }
 }
@@ -978,7 +1125,7 @@ async function drawNote(){
   if(me<0||me!==roomData.current||roomData.drawn)return;
   try{
     await withTimeout(tx(roomRef,current=>{
-      if(current.current!==me||current.drawn||current.winner)return;
+      if(current.current!==me||current.drawn||current.winner||current.pending)return;
       const card=drawCard(current.settings);
       current.drawn=card;
       current.itemQueue=[];
@@ -997,7 +1144,7 @@ async function useReroll(){
   if(me<0||me!==roomData.current)return;
   try{
     await withTimeout(tx(roomRef,current=>{
-      if(current.current!==me||!current.drawn||current.winner)return;
+      if(current.current!==me||!current.drawn||current.winner||current.pending)return;
       if(!current.settings.itemsOn.reroll)return;
       const p=current.players[me];
       if(!(p.items.reroll>0))return;
@@ -1015,21 +1162,26 @@ async function useReroll(){
 }
 
 async function toggleItem(type){
-  if(!roomData?.drawn)return;
+  if(!roomData?.drawn||roomData.pending)return;
   const me=myIndex();
   if(me<0||me!==roomData.current)return;
   const key=QUEUE_ITEM[type];
   if(!key)return;
   try{
     await withTimeout(tx(roomRef,current=>{
-      if(current.current!==me||!current.drawn)return;
+      if(current.current!==me||!current.drawn||current.pending)return;
       if(!current.settings.itemsOn[key])return;
       const have=current.players[me].items[key]||0;
       if(have<=0)return;
       const cap=type==="again"?1:have;
       const used=current.itemQueue.filter(x=>x===type).length;
-      if(used>=cap)current.itemQueue=current.itemQueue.filter(x=>x!==type);
-      else current.itemQueue.push(type);
+      const limit=current.settings.itemLimit;
+      if(used>=cap){
+        current.itemQueue=current.itemQueue.filter(x=>x!==type);
+      }else{
+        if(limit>0&&current.itemQueue.length>=limit)return;
+        current.itemQueue.push(type);
+      }
       return current;
     }));
   }catch(e){
@@ -1048,28 +1200,24 @@ function selectPiece(i){
 }
 
 async function moveSelected(){
-  if(busy||!roomData?.drawn)return;
+  if(busy||!roomData?.drawn||roomData.pending)return;
   const me=myIndex();
   if(me<0||me!==roomData.current)return;
   const wantedPiece=selectedPiece;
   busy=true;
   try{
     await withTimeout(tx(roomRef,current=>{
-      if(current.current!==me||!current.drawn||current.winner)return;
+      if(current.current!==me||!current.drawn||current.winner||current.pending)return;
       const cfg=current.settings;
       const TR=12*cfg.octaves;
       const p=current.players[me];
-
-      let idx=wantedPiece;
-      if(!p.pieces[idx]||p.pieces[idx].done)idx=p.pieces.findIndex(x=>!x.done);
-      if(idx<0)return;
-      const piece=p.pieces[idx];
 
       const queue=current.itemQueue.slice();
       const needSharp=queue.filter(x=>x==="#").length;
       const needFlat=queue.filter(x=>x==="b").length;
       const useAgain=queue.includes("again");
       if(needSharp>p.items.sharp||needFlat>p.items.flat||(useAgain&&p.items.again<1))return;
+      if(cfg.itemLimit>0&&queue.length>cfg.itemLimit)return;
 
       let target=current.drawn.semi;
       for(const item of queue){
@@ -1078,22 +1226,31 @@ async function moveSelected(){
       }
       target=((target%12)+12)%12;
 
-      const dest=nextDestination(piece.pos,target);
+      // 말마다 도착할 칸 / 이동 가능 여부
+      const dests=p.pieces.map(pc=>pc.done?null:nextDestination(pc.pos,target));
+      const legal=i=>dests[i]!==null&&(!cfg.rules.exactFinish||dests[i]<=TR);
+
+      let idx=wantedPiece;
+      if(!p.pieces[idx]||p.pieces[idx].done)idx=p.pieces.findIndex(x=>!x.done);
+      if(idx<0)return;
+
+      if(!legal(idx)){
+        if(dests.some((d,i)=>legal(i)))return; // 다른 말은 움직일 수 있음 → 그 말을 고르게 함
+        // 움직일 수 있는 말이 없으면 차례 넘김 (아이템은 소모하지 않음)
+        current.logs.push(`⏭ ${p.name}은(는) ${current.drawn.name} 카드로 움직일 수 있는 말이 없어 차례를 넘깁니다.`);
+        p.lastSemi=current.drawn.semi;
+        current.drawn=null;
+        current.itemQueue=[];
+        advanceTurn(current);
+        return current;
+      }
+
+      const piece=p.pieces[idx];
+      const dest=dests[idx];
       const passedDo=Math.floor(dest/12)>Math.floor(piece.pos/12);
 
       // 도를 지나면 보상 아이템
-      if(passedDo&&cfg.passReward>0){
-        const pool=ITEM_TYPES.filter(t=>cfg.itemsOn[t.key]);
-        if(pool.length){
-          const got=[];
-          for(let k=0;k<cfg.passReward;k++){
-            const t=pool[Math.floor(Math.random()*pool.length)];
-            p.items[t.key]+=1;
-            got.push(`${t.label} ${t.name}`);
-          }
-          current.logs.push(`${p.name}이(가) 도를 지나 아이템을 얻었습니다: ${got.join(", ")}`);
-        }
-      }
+      if(passedDo)grantItems(current,p,cfg.passReward,"도를 지나");
 
       piece.pos=dest;
 
@@ -1102,19 +1259,36 @@ async function moveSelected(){
       p.items.flat=Math.max(0,p.items.flat-needFlat);
       if(useAgain)p.items.again=Math.max(0,p.items.again-1);
 
+      // 특별 룰: 반음 칸 보너스
+      if(cfg.rules.semitoneBonus&&dest<TR&&SHARP_PCS.includes(dest%12)){
+        grantItems(current,p,1,"반음 칸에 도착해");
+      }
+
+      // 한 번 더 (아이템 또는 같은 음 연속 룰)
+      let extra=useAgain;
+      if(cfg.rules.sameNoteAgain&&p.lastSemi===current.drawn.semi){
+        extra=true;
+        current.logs.push(`🔁 ${p.name}이(가) 같은 음을 연속으로 뽑았습니다!`);
+      }
+      p.lastSemi=current.drawn.semi;
+
       // 충돌
-      if(cfg.collisionBack>0){
+      const pendingVictims=[];
+      if(cfg.collisionBack>0&&piece.pos<TR&&!(cfg.rules.safeDo&&piece.pos%12===0)){
         current.players.forEach((op,oi)=>{
           if(oi===me)return;
           op.pieces.forEach((other,oj)=>{
             if(other.done||other.pos!==piece.pos)return;
-            if(op.items.shield>0){
-              op.items.shield-=1;
-              current.logs.push(`🛡 ${op.name}의 말 ${oj+1}이(가) 방어 카드로 ${p.name}의 충돌을 막았습니다!`);
+            if(cfg.itemsOn.shield&&op.items.shield>0){
+              if(cfg.shieldMode==="auto"){
+                op.items.shield-=1;
+                current.logs.push(`🛡 ${op.name}의 말 ${oj+1}이(가) 방어 카드로 ${p.name}의 충돌을 막았습니다!`);
+              }else{
+                pendingVictims.push({p:oi,i:oj});
+              }
               return;
             }
-            other.pos=Math.max(0,other.pos-12*cfg.collisionBack);
-            current.logs.push(`⚔️ ${p.name}이(가) ${op.name}의 말 ${oj+1}과 충돌! 상대 말이 ${cfg.collisionBack}옥타브 뒤로 이동합니다.`);
+            knockback(current,me,oi,oj);
           });
         });
       }
@@ -1140,11 +1314,18 @@ async function moveSelected(){
 
       current.drawn=null;
       current.itemQueue=[];
-      if(useAgain){
+
+      // 방어 카드를 쓸지 상대가 정할 때까지 기다림
+      if(pendingVictims.length){
+        current.pending={victims:pendingVictims,by:me,extra:!!extra,at:Date.now()};
+        current.logs.push(`⚔️ ${p.name}이(가) 상대 말과 충돌! 방어 카드를 쓸지 기다립니다...`);
+        return current;
+      }
+
+      if(extra){
         current.logs.push(`⏭ ${p.name}이(가) 한 번 더 진행합니다!`);
       }else{
-        current.current=(current.current+1)%current.players.length;
-        current.logs.push(`${current.players[current.current].name}의 차례입니다.`);
+        advanceTurn(current);
       }
       return current;
     }));
@@ -1155,6 +1336,68 @@ async function moveSelected(){
     busy=false;
   }
 }
+
+/* 방어 카드 사용 여부 응답 (force=true: 상대가 응답이 없을 때 공격자가 20초 뒤 자동 진행) */
+async function respondShield(use,force){
+  if(!roomData?.pending)return;
+  const me=myIndex();
+  const stamp=roomData.pending.at;
+  try{
+    await withTimeout(tx(roomRef,current=>{
+      const pd=current.pending;
+      if(!pd||pd.at!==stamp)return;
+      const v=pd.victims[0];
+      if(!v)return;
+      if(force){
+        if(current.current!==me||Date.now()-pd.at<20000)return;
+      }else if(v.p!==me){
+        return;
+      }
+      const op=current.players[v.p];
+      pd.victims.shift();
+      if(!force&&use&&op.items.shield>0){
+        op.items.shield-=1;
+        current.logs.push(`🛡 ${op.name}의 말 ${v.i+1}이(가) 방어 카드로 ${current.players[pd.by].name}의 충돌을 막았습니다!`);
+      }else{
+        knockback(current,pd.by,v.p,v.i);
+      }
+      // 방어 카드가 없는 다음 피해자는 바로 처리
+      while(pd.victims.length){
+        const nv=pd.victims[0];
+        if(current.players[nv.p].items.shield>0)break;
+        knockback(current,pd.by,nv.p,nv.i);
+        pd.victims.shift();
+      }
+      if(pd.victims.length){
+        pd.at=Date.now();
+        current.pending=pd;
+        return current;
+      }
+      current.pending=null;
+      if(pd.extra)current.logs.push(`⏭ ${current.players[pd.by].name}이(가) 한 번 더 진행합니다!`);
+      else advanceTurn(current);
+      return current;
+    }));
+  }catch(e){
+    console.error(e);
+    alert(explainError(e));
+  }
+}
+window.respondShield=respondShield;
+
+// 방어 결정 대기 시간 표시 + 응답이 없으면 공격자 쪽에서 자동 진행
+let forcing=false;
+setInterval(()=>{
+  const pd=roomData?.pending;
+  if(!pd)return;
+  const left=Math.max(0,20-Math.floor((Date.now()-pd.at)/1000));
+  const el=document.getElementById("shieldTimer");
+  if(el)el.textContent=`${left}초 안에 정하지 않으면 사용하지 않은 것으로 처리됩니다.`;
+  if(left===0&&myIndex()===roomData.current&&!forcing){
+    forcing=true;
+    respondShield(false,true).finally(()=>{forcing=false;});
+  }
+},1000);
 
 function showWinner(name){
   document.getElementById("winTitle").textContent="🎉 승리!";
