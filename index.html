@@ -25,11 +25,13 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
 .primary{width:100%;margin-top:14px;padding:14px;border-radius:13px;background:#7c3aed;color:#fff;font-weight:900}
 .primary:disabled{opacity:.5}
 .secondary{width:100%;margin-top:10px;padding:13px;border-radius:13px;background:#111827;color:#fff;font-weight:900}
+.settingsOpen{width:100%;margin-top:10px;padding:13px;border-radius:13px;background:#f5f3ff;color:#6d28d9;font-weight:900;border:2px solid #ddd6fe}
 .roomBox{padding:17px;border-radius:17px;background:#f7f5ff;border:1px solid #e8e0ff;margin-top:16px}
 .roomCode{font-size:34px;font-weight:1000;letter-spacing:7px;text-align:center;color:#6d28d9;margin:7px 0}
 .roomHint{text-align:center;color:#6b7280;font-size:13px;line-height:1.5}
 .playersWaiting{margin-top:13px;display:grid;gap:7px}
 .waitPlayer{padding:10px 12px;border-radius:11px;background:#fff;border:1px solid #e5e7eb;font-weight:800}
+.summaryBox{margin-top:14px;padding:14px 16px;border-radius:15px;background:#fff;border:1px solid #e5e7eb;font-size:13px;line-height:1.75;color:#374151}
 .rules{margin-top:20px;padding:16px;border-radius:15px;background:#f7f5ff;color:#4c1d95;line-height:1.65;font-size:14px}
 .error{display:none;margin-top:12px;padding:12px;border-radius:12px;background:#fef2f2;color:#b91c1c;font-size:13px;line-height:1.5;white-space:pre-line}
 .game{display:none}
@@ -37,20 +39,20 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
 .player{padding:13px;background:#fff;border:2px solid #e5e7eb;border-radius:16px}
 .player.active{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.08)}
 .player .name{font-weight:900}
-.player .meta{font-size:13px;color:#6b7280;margin-top:4px}
+.player .meta{font-size:13px;color:#6b7280;margin-top:4px;line-height:1.5}
 .boardPanel{padding:18px}
 .boardArea{position:relative;width:min(94vw,900px);aspect-ratio:1;margin:0 auto}
 .board{container-type:inline-size;position:absolute;inset:4%;border-radius:50%;background:#fff;border:12px solid #e9e7ff;box-shadow:inset 0 0 0 1px #ddd,0 18px 45px rgba(0,0,0,.08)}
 .board:before{content:"";position:absolute;inset:25%;border-radius:50%;background:#f7f8fc;border:2px dashed #d7d9e0}
 .center{position:absolute;inset:39%;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;background:#fff;border:1px solid #e5e7eb;font-weight:900;color:#6d28d9;line-height:1.2;box-shadow:0 5px 18px rgba(0,0,0,.07);z-index:2}
-.key{position:absolute;width:4.9%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;border:2px solid #d6d8df;font-size:clamp(6px,1.55cqw,14px);font-weight:900;line-height:1;color:#374151;z-index:4;transition:.15s}
+.key{position:absolute;width:calc(var(--cell,4.9) * 1%);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;border:2px solid #d6d8df;font-size:clamp(6px,calc(var(--cell,4.9) * .32cqw),20px);font-weight:900;line-height:1;color:#374151;z-index:4;transition:.15s}
 .key.sharp{background:#f3f4f6;color:#6b7280;font-weight:800}
 .key.do{border-color:#7c3aed;background:#f5f3ff;color:#6d28d9}
 .key.soft{background:#ede9fe;border-color:#a78bfa}
 .key.target{box-shadow:0 0 0 .5cqw rgba(124,58,237,.25);transform:translate(-50%,-50%) scale(1.3);border-color:#7c3aed;background:#ddd6fe;z-index:6}
-.key small{position:absolute;top:-1.9cqw;font-size:clamp(5px,1.15cqw,10px);color:#7c3aed;font-weight:800;white-space:nowrap}
-.token-stack{position:absolute;display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:1px;width:5.6cqw;min-width:26px;z-index:8;transform:translate(-50%,-50%);pointer-events:none}
-.token{width:clamp(9px,1.9cqw,17px);height:clamp(9px,1.9cqw,17px);border-radius:50%;border:1.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(5px,1cqw,9px);font-weight:900;pointer-events:auto}
+.key small{position:absolute;top:calc(var(--cell,4.9) * -.39cqw);font-size:clamp(5px,calc(var(--cell,4.9) * .23cqw),11px);color:#7c3aed;font-weight:800;white-space:nowrap}
+.token-stack{position:absolute;display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:1px;width:calc(var(--cell,4.9) * 1.14cqw);min-width:26px;z-index:8;transform:translate(-50%,-50%);pointer-events:none}
+.token{width:clamp(9px,calc(var(--cell,4.9) * .39cqw),22px);height:clamp(9px,calc(var(--cell,4.9) * .39cqw),22px);border-radius:50%;border:1.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(5px,calc(var(--cell,4.9) * .2cqw),11px);font-weight:900;pointer-events:auto}
 .c0{background:#ef4444}.c1{background:#2563eb}.c2{background:#16a34a}.c3{background:#f59e0b}
 .controls{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-top:14px}
 .box{padding:18px;background:#fff;border:1px solid #e5e7eb;border-radius:18px}
@@ -62,11 +64,12 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
 .action button{width:100%;padding:12px;border-radius:12px;background:#111827;color:#fff;font-weight:900}
 .action button:disabled{opacity:.45}
 .itemRow{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
-.itemBtn{padding:13px;border-radius:12px;background:#f3f4f6;color:#111827;font-weight:900;border:2px solid transparent}
+.itemBtn{padding:13px 8px;border-radius:12px;background:#f3f4f6;color:#111827;font-weight:900;border:2px solid transparent;font-size:14px}
 .itemBtn.selected{background:#f5f3ff;border-color:#7c3aed;color:#6d28d9}
 .itemBtn:disabled{opacity:.4}
+.itemBtn.passive{background:#fafafa;text-align:center;cursor:default;border:2px dashed #e5e7eb}
 .itemInfo{margin:10px 0 0;color:#6b7280;font-size:13px;line-height:1.5}
-.pieceRow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.pieceRow{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px;margin-top:12px}
 .pieceBtn{padding:12px 7px;border-radius:11px;background:#f3f4f6;font-weight:800;color:#111827}
 .pieceBtn.active{background:#111827;color:#fff}
 .pieceBtn.done{background:#dcfce7;color:#166534}
@@ -83,13 +86,30 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
 .modalBox h2{font-size:32px;margin:0 0 8px}
 .modalBox p{color:#6b7280}
 .modalBox button{padding:13px 20px;border-radius:12px;background:#7c3aed;color:#fff;font-weight:900}
+.settingsBox{width:min(94vw,540px);max-height:88vh;overflow:auto;text-align:left;padding:24px}
+.settingsBox h2{font-size:24px;margin:0 0 2px}
+.settingsBox .desc{color:#6b7280;font-size:13px;margin:0 0 4px}
+.setSection{margin:18px 0 4px;font-weight:900;color:#6d28d9;font-size:14px}
+.setRow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #f0f1f4}
+.setRow .lbl{font-weight:800;font-size:14px}
+.setRow .lbl small{display:block;color:#6b7280;font-weight:500;font-size:12px;margin-top:2px}
+.setRow select{width:auto;min-width:130px;padding:8px 10px}
+.setItem{padding:11px 0;border-bottom:1px solid #f0f1f4}
+.setItem .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.setItem .chk{display:flex;align-items:center;gap:8px;margin:0;font-weight:800;font-size:14px}
+.setItem input[type=checkbox]{width:18px;height:18px;padding:0}
+.setItem small{display:block;color:#6b7280;font-size:12px;margin:3px 0 0 26px;line-height:1.4}
+.setBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px}
+.setBtns button{padding:13px}
+.setBtns .save{grid-column:1/-1}
+.setBtns .ghost{background:#f3f4f6;color:#111827}
 @media(max-width:760px){
  .status{grid-template-columns:repeat(2,1fr)}
  .controls{grid-template-columns:1fr}
  .wrap{padding:16px 8px 40px}
  .boardPanel{padding:6px}
  .boardArea{width:min(100%,600px)}
- .key.sharp{font-size:0}
+ .board.dense .key.sharp{font-size:0}
  .roomBar{align-items:flex-start}
 }
 </style>
@@ -120,10 +140,11 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
       <div class="rules">
         <b>게임 규칙</b><br>
         계이름 카드를 뽑고 그 음이 적힌 칸까지 이동합니다.
-        이동 중 도를 지나면 아이템을 1개 얻습니다.
+        이동 중 도를 지나면 아이템을 얻습니다.
         #은 반음 위, ♭는 반음 아래로 목표 음을 바꿉니다.
-        상대 말이 있는 칸에 도착하면 상대 말은 1옥타브(12반음) 뒤로 갑니다.
-        판 한 바퀴는 4옥타브(48칸)이고, 한 바퀴를 돌아 시작 칸에 도착하면 그 말은 통과합니다.
+        상대 말이 있는 칸에 도착하면 상대 말은 뒤로 밀려납니다.
+        한 바퀴를 돌아 시작 칸에 도착하면 그 말은 통과합니다.
+        말 개수, 판 크기, 아이템 종류 등은 방장이 방 화면 아래의 <b>게임 설정</b>에서 바꿀 수 있습니다.
       </div>
     </div>
 
@@ -134,8 +155,10 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
         <div class="roomHint">친구에게 이 4자리 코드를 알려주세요.<br>같은 코드를 입력하면 실시간으로 같은 게임에 들어옵니다.</div>
         <div id="waitingPlayers" class="playersWaiting"></div>
       </div>
+      <div id="settingsSummary" class="summaryBox"></div>
       <button id="startGameBtn" class="primary" onclick="hostStartGame()">🎮 게임 시작</button>
       <button class="secondary" onclick="leaveRoom()">방 나가기</button>
+      <button id="settingsBtn" class="settingsOpen" onclick="openSettings()" style="display:none">⚙️ 게임 설정</button>
       <div id="lobbyError" class="error"></div>
     </div>
   </section>
@@ -150,7 +173,7 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
     <section class="panel boardPanel">
       <div class="boardArea">
         <div id="board" class="board"></div>
-        <div class="center">FORMWHEEL<br>🎹<br><span style="font-size:.6em;color:#6b7280">4옥타브 · 48칸</span></div>
+        <div id="centerText" class="center">FORMWHEEL<br>🎹</div>
       </div>
     </section>
 
@@ -169,12 +192,10 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
 
       <section class="box">
         <b>아이템 카드</b>
-        <div class="itemRow">
-          <button id="sharpBtn" class="itemBtn" onclick="toggleItem('#')"># × <span id="sharpCount">0</span><span id="sharpUse"></span></button>
-          <button id="flatBtn" class="itemBtn" onclick="toggleItem('b')">♭ × <span id="flatCount">0</span><span id="flatUse"></span></button>
-        </div>
+        <div id="itemRow" class="itemRow"></div>
         <div class="itemInfo">
-          이번 이동에 사용할 아이템입니다. 버튼을 누를 때마다 1장씩 추가되고, 보유 수만큼 누르면 다시 해제됩니다.
+          # · ♭ · ⏭ 는 이번 이동에 쓸 만큼 눌러 선택합니다(보유 수만큼 누르면 해제).
+          🎲는 누르면 바로 카드를 다시 뽑고, 🛡는 충돌할 때 자동으로 사용됩니다.
         </div>
       </section>
     </div>
@@ -189,11 +210,56 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
   </section>
 </main>
 
+<!-- 게임 결과 -->
 <div id="modal" class="modal">
   <div class="modalBox">
     <h2 id="winTitle">🎉 승리!</h2>
     <p id="winText"></p>
     <button onclick="location.reload()">다시 하기</button>
+  </div>
+</div>
+
+<!-- 게임 설정 (방장 전용) -->
+<div id="settingsModal" class="modal">
+  <div class="modalBox settingsBox">
+    <h2>⚙️ 게임 설정</h2>
+    <p class="desc">게임 시작 전에 방장만 바꿀 수 있습니다.</p>
+
+    <div class="setSection">기본 규칙</div>
+    <div class="setRow">
+      <div class="lbl">말 개수<small>플레이어 한 명당 말 개수</small></div>
+      <select id="set_pieces" onchange="onPiecesChange()"></select>
+    </div>
+    <div class="setRow">
+      <div class="lbl">승리 조건<small>몇 개를 통과시키면 이기는지</small></div>
+      <select id="set_goal"></select>
+    </div>
+    <div class="setRow">
+      <div class="lbl">판 크기<small>한 바퀴 = 12칸 × 옥타브 수</small></div>
+      <select id="set_octaves"></select>
+    </div>
+    <div class="setRow">
+      <div class="lbl">계이름 카드<small>뽑을 수 있는 음의 범위</small></div>
+      <select id="set_cards"></select>
+    </div>
+    <div class="setRow">
+      <div class="lbl">충돌 페널티<small>상대 말이 있는 칸에 도착했을 때</small></div>
+      <select id="set_collision"></select>
+    </div>
+
+    <div class="setSection">아이템 카드</div>
+    <div class="setRow">
+      <div class="lbl">도를 지날 때 얻는 아이템<small>사용 중인 아이템 중 무작위로 지급</small></div>
+      <select id="set_reward"></select>
+    </div>
+    <div id="set_items"></div>
+
+    <div class="setBtns">
+      <button class="save" onclick="saveSettings()">💾 저장</button>
+      <button class="ghost" onclick="resetSettingsForm()">기본값으로</button>
+      <button class="ghost" onclick="closeSettings()">닫기</button>
+    </div>
+    <div id="settingsError" class="error"></div>
   </div>
 </div>
 
@@ -238,19 +304,55 @@ onValue(ref(db,".info/connected"),snap=>{
   el.style.color=ok?"#16a34a":"#b91c1c";
 });
 
+/* ---------- 상수 ---------- */
 const ROOT="pianoRooms";
-const OCTAVES=4;
-const TRACK=12*OCTAVES; // 판 한 바퀴 = 48칸
 const NATURAL=[
   {name:"도",semi:0},{name:"레",semi:2},{name:"미",semi:4},{name:"파",semi:5},
   {name:"솔",semi:7},{name:"라",semi:9},{name:"시",semi:11}
 ];
 const SEMI_NAMES=["도","도♯","레","레♯","미","파","파♯","솔","솔♯","라","라♯","시"];
+const ALL_NOTES=SEMI_NAMES.map((name,semi)=>({name,semi}));
 const COLORS=["c0","c1","c2","c3"];
 
-/* 페이지를 열 때마다 새 ID를 만든다.
-   (localStorage는 탭끼리 공유되고, sessionStorage도 '탭 복제'나 링크로 연 탭에는 복사돼서
-    같은 브라우저에서 테스트하면 두 탭이 같은 사람으로 취급될 수 있음) */
+/* 아이템 종류. def = 기본으로 사용 여부 */
+const ITEM_TYPES=[
+  {key:"sharp",label:"#",name:"샤프",desc:"목표 음을 반음 올립니다.",def:true},
+  {key:"flat",label:"♭",name:"플랫",desc:"목표 음을 반음 내립니다.",def:true},
+  {key:"reroll",label:"🎲",name:"다시 뽑기",desc:"뽑은 계이름 카드를 버리고 다시 뽑습니다.",def:false},
+  {key:"shield",label:"🛡",name:"방어",desc:"상대 말과 충돌해도 밀려나지 않습니다. 충돌 시 자동으로 1장 사용됩니다.",def:false},
+  {key:"again",label:"⏭",name:"한 번 더",desc:"이번 이동 후 한 번 더 내 차례가 됩니다. (이동당 1장)",def:false}
+];
+const QUEUE_ITEM={"#":"sharp","b":"flat","again":"again"};
+
+/* ---------- 게임 설정 ---------- */
+function normalizeSettings(raw){
+  const r=raw||{};
+  const clamp=(v,lo,hi,d)=>{
+    v=Number(v);
+    return Number.isFinite(v)?Math.min(hi,Math.max(lo,Math.round(v))):d;
+  };
+  const cfg={
+    pieces:clamp(r.pieces,1,6,4),
+    octaves:clamp(r.octaves,1,6,4),
+    cardRange:r.cardRange==="all"?"all":"natural",
+    collisionBack:clamp(r.collisionBack,0,2,1),
+    passReward:clamp(r.passReward,0,3,1),
+    goal:0,
+    itemsOn:{},
+    itemsStart:{}
+  };
+  cfg.goal=clamp(r.goal,0,cfg.pieces,0);
+  if(cfg.goal>=cfg.pieces)cfg.goal=0; // 0 = 전부 통과
+  ITEM_TYPES.forEach(t=>{
+    const on=r.itemsOn&&r.itemsOn[t.key]!==undefined?!!r.itemsOn[t.key]:t.def;
+    cfg.itemsOn[t.key]=on;
+    cfg.itemsStart[t.key]=clamp(r.itemsStart&&r.itemsStart[t.key],0,5,0);
+  });
+  return cfg;
+}
+const DEFAULT_SETTINGS=normalizeSettings({});
+
+/* 탭을 열 때마다 새 ID */
 const clientId=(crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now().toString(36));
 
 let roomCode="";
@@ -260,7 +362,7 @@ let myName="";
 let roomData=null;
 let selectedPiece=0;
 let busy=false;
-let boardBuilt=false;
+let boardTrack=0;
 
 window.goHome=()=>location.href="https://semicolonxss.github.io/Formwheel/";
 window.createRoom=createRoom;
@@ -270,8 +372,17 @@ window.leaveRoom=leaveRoom;
 window.copyRoomCode=copyRoomCode;
 window.drawNote=drawNote;
 window.toggleItem=toggleItem;
+window.useReroll=useReroll;
 window.selectPiece=selectPiece;
 window.moveSelected=moveSelected;
+window.openSettings=openSettings;
+window.closeSettings=closeSettings;
+window.saveSettings=saveSettings;
+window.resetSettingsForm=resetSettingsForm;
+window.onPiecesChange=onPiecesChange;
+
+const S=()=>roomData?.settings||DEFAULT_SETTINGS;
+const trackLen=()=>12*S().octaves;
 
 /* ---------- 유틸 ---------- */
 function withTimeout(p,ms=12000){
@@ -296,13 +407,13 @@ function explainError(e){
 }
 
 function showError(text){
-  ["error","lobbyError"].forEach(id=>{
+  ["error","lobbyError","settingsError"].forEach(id=>{
     const el=document.getElementById(id);
     if(el){el.textContent=text;el.style.display="block";}
   });
 }
 function clearError(){
-  ["error","lobbyError"].forEach(id=>{
+  ["error","lobbyError","settingsError"].forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.style.display="none";
   });
@@ -310,6 +421,8 @@ function clearError(){
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 }
+const range=(a,b)=>Array.from({length:Math.max(0,b-a+1)},(_,i)=>a+i);
+const zeroItems=()=>Object.fromEntries(ITEM_TYPES.map(t=>[t.key,0]));
 
 /* Firebase는 null/빈 배열을 저장하지 않아서 읽어오면 필드가 사라진다.
    항상 같은 모양으로 맞춰서 사용한다. */
@@ -320,11 +433,11 @@ function toArray(v){
 }
 function normalize(d){
   if(!d)return null;
+  d.settings=normalizeSettings(d.settings);
   d.players=toArray(d.players);
   d.players.forEach(p=>{
     p.pieces=toArray(p.pieces);
-    p.sharp=p.sharp||0;
-    p.flat=p.flat||0;
+    p.items=Object.assign(zeroItems(),p.items||{});
   });
   d.itemQueue=toArray(d.itemQueue);
   d.logs=toArray(d.logs);
@@ -334,9 +447,7 @@ function normalize(d){
   return d;
 }
 
-/* 트랜잭션 헬퍼.
-   첫 실행 때 current가 null일 수 있는데, 여기서 undefined를 반환하면 트랜잭션이 바로 취소된다.
-   null을 그대로 반환하면 SDK가 서버의 실제 값으로 다시 실행해준다. */
+/* 트랜잭션 헬퍼 (첫 실행에서 current가 null이면 그대로 반환 → 서버 값으로 재시도) */
 function tx(ref_,fn){
   return runTransaction(ref_,cur=>{
     if(cur===null)return cur;
@@ -353,9 +464,8 @@ function makePlayer(name){
   return {
     id:clientId,
     name:(name||"플레이어").trim().slice(0,12),
-    sharp:0,
-    flat:0,
-    pieces:[{pos:0,done:false},{pos:0,done:false},{pos:0,done:false},{pos:0,done:false}]
+    items:zeroItems(),
+    pieces:range(1,DEFAULT_SETTINGS.pieces).map(()=>({pos:0,done:false}))
   };
 }
 
@@ -368,8 +478,14 @@ function initialState(players){
     itemQueue:[],
     players,
     winner:null,
+    settings:DEFAULT_SETTINGS,
     logs:[`${players[0].name}이 방을 만들었습니다.`]
   };
+}
+
+function drawCard(cfg){
+  const pool=cfg.cardRange==="all"?ALL_NOTES:NATURAL;
+  return pool[Math.floor(Math.random()*pool.length)];
 }
 
 function setBusy(v){
@@ -396,7 +512,6 @@ async function createRoom(){
     if(!code){showError("방을 만들 수 없습니다. 잠시 후 다시 시도해주세요.");return}
     const r=ref(db,ROOT+"/"+code);
     await withTimeout(set(r,initialState([makePlayer(myName)])));
-    // 서버에 실제로 저장됐는지 다시 읽어서 확인
     const check=await withTimeout(get(r));
     if(!check.exists()){
       showError("방을 서버에 저장하지 못했습니다.\nFirebase 규칙(pianoRooms 쓰기 허용)과 databaseURL을 확인해주세요.");
@@ -423,22 +538,19 @@ async function joinRoom(){
   setBusy(true);
   try{
     const r=ref(db,ROOT+"/"+code);
-
-    // 1) 방이 있는지 서버에서 직접 확인
     const snap=await withTimeout(get(r));
     if(!snap.exists()){
       showError(`${code}번 방을 찾을 수 없습니다.\n코드를 다시 확인하거나, 방장이 방을 나가지 않았는지 확인해주세요.`);
       return;
     }
 
-    // 2) 트랜잭션으로 참가 (동시에 여러 명이 들어와도 안전)
     const player=makePlayer(myName);
     let reason="";
     const res=await withTimeout(runTransaction(r,cur=>{
-      if(cur===null)return cur; // 서버 값으로 재시도 유도
+      if(cur===null)return cur;
       normalize(cur);
       reason="";
-      if(cur.players.some(p=>p.id===clientId))return cur; // 이미 참가한 사람 (재접속)
+      if(cur.players.some(p=>p.id===clientId))return cur;
       if(cur.phase!=="lobby"){reason="started";return;}
       if(cur.players.length>=4){reason="full";return;}
       cur.players.push(player);
@@ -498,6 +610,18 @@ function showLobby(){
   renderLobbyPlayers();
 }
 
+function settingsSummaryHtml(c){
+  const on=ITEM_TYPES.filter(t=>c.itemsOn[t.key]);
+  const items=on.length
+    ? on.map(t=>`${t.label} ${t.name}${c.itemsStart[t.key]?` (시작 ${c.itemsStart[t.key]}장)`:""}`).join(" · ")
+    : "없음";
+  return `<b>⚙️ 게임 설정</b><br>`
+    +`말 ${c.pieces}개 · ${c.goal?`${c.goal}개 통과하면 승리`:"전부 통과하면 승리"}<br>`
+    +`판 ${c.octaves}옥타브 (${c.octaves*12}칸) · 카드 ${c.cardRange==="all"?"반음 포함 12개":"자연음 7개"}<br>`
+    +`충돌 ${c.collisionBack?`${c.collisionBack}옥타브 뒤로`:"페널티 없음"} · 도 통과 보상 ${c.passReward?`${c.passReward}장`:"없음"}<br>`
+    +`아이템: ${items}`;
+}
+
 function renderLobbyPlayers(){
   if(!roomData)return;
   const players=roomData.players;
@@ -510,6 +634,8 @@ function renderLobbyPlayers(){
   btn.style.display=host?"block":"none";
   btn.disabled=players.length<2;
   btn.textContent=players.length<2?"👥 2명 이상 필요":"🎮 게임 시작";
+  document.getElementById("settingsBtn").style.display=host?"block":"none";
+  document.getElementById("settingsSummary").innerHTML=settingsSummaryHtml(roomData.settings);
 }
 
 async function hostStartGame(){
@@ -519,6 +645,14 @@ async function hostStartGame(){
     await withTimeout(tx(roomRef,current=>{
       if(current.hostId!==clientId||current.phase!=="lobby")return;
       if(current.players.length<2)return;
+      const cfg=current.settings;
+      current.players.forEach(p=>{
+        p.pieces=range(1,cfg.pieces).map(()=>({pos:0,done:false}));
+        p.items=zeroItems();
+        ITEM_TYPES.forEach(t=>{
+          if(cfg.itemsOn[t.key])p.items[t.key]=cfg.itemsStart[t.key];
+        });
+      });
       current.phase="game";
       current.current=0;
       current.drawn=null;
@@ -538,7 +672,7 @@ async function leaveRoom(){
     try{
       await withTimeout(tx(roomRef,current=>{
         current.players=current.players.filter(p=>p.id!==clientId);
-        if(current.players.length===0)return null; // 빈 방 삭제
+        if(current.players.length===0)return null;
         if(current.hostId===clientId){
           current.hostId=current.players[0].id;
           current.logs.push(`${current.players[0].name}이 새 호스트가 되었습니다.`);
@@ -550,12 +684,96 @@ async function leaveRoom(){
   location.reload();
 }
 
+/* ---------- 게임 설정 창 ---------- */
+function fillSelect(id,opts,val){
+  const el=document.getElementById(id);
+  el.innerHTML=opts.map(([v,l])=>`<option value="${v}" ${String(v)===String(val)?"selected":""}>${l}</option>`).join("");
+}
+const val=id=>document.getElementById(id).value;
+
+function rebuildGoal(pieces,cur){
+  const opts=[[0,"전부 통과"]].concat(range(1,pieces-1).map(n=>[n,`${n}개 통과`]));
+  fillSelect("set_goal",opts,cur>0&&cur<pieces?cur:0);
+}
+function onPiecesChange(){
+  rebuildGoal(Number(val("set_pieces")),Number(val("set_goal")));
+}
+
+function fillSettingsForm(c){
+  fillSelect("set_pieces",range(1,6).map(n=>[n,`${n}개`]),c.pieces);
+  rebuildGoal(c.pieces,c.goal);
+  fillSelect("set_octaves",range(1,6).map(n=>[n,`${n}옥타브 (${n*12}칸)`]),c.octaves);
+  fillSelect("set_cards",[["natural","자연음 7개 (도레미파솔라시)"],["all","반음 포함 12개"]],c.cardRange);
+  fillSelect("set_collision",[[0,"페널티 없음"],[1,"1옥타브 뒤로"],[2,"2옥타브 뒤로"]],c.collisionBack);
+  fillSelect("set_reward",range(0,3).map(n=>[n,n?`${n}장`:"없음"]),c.passReward);
+  document.getElementById("set_items").innerHTML=ITEM_TYPES.map(t=>`
+    <div class="setItem">
+      <div class="top">
+        <label class="chk"><input type="checkbox" id="on_${t.key}" ${c.itemsOn[t.key]?"checked":""}> ${t.label} ${t.name}</label>
+        <span style="font-size:13px;white-space:nowrap">시작 <select id="st_${t.key}" style="width:auto;padding:6px 8px">${range(0,5).map(n=>`<option value="${n}" ${n===c.itemsStart[t.key]?"selected":""}>${n}</option>`).join("")}</select> 장</span>
+      </div>
+      <small>${t.desc}</small>
+    </div>`).join("");
+}
+
+function openSettings(){
+  if(!roomData||roomData.hostId!==clientId||roomData.phase!=="lobby")return;
+  clearError();
+  fillSettingsForm(roomData.settings);
+  document.getElementById("settingsModal").style.display="flex";
+}
+function closeSettings(){
+  document.getElementById("settingsModal").style.display="none";
+}
+function resetSettingsForm(){
+  fillSettingsForm(DEFAULT_SETTINGS);
+}
+
+async function saveSettings(){
+  if(!roomData||roomData.hostId!==clientId)return;
+  const raw={
+    pieces:Number(val("set_pieces")),
+    goal:Number(val("set_goal")),
+    octaves:Number(val("set_octaves")),
+    cardRange:val("set_cards"),
+    collisionBack:Number(val("set_collision")),
+    passReward:Number(val("set_reward")),
+    itemsOn:{},
+    itemsStart:{}
+  };
+  ITEM_TYPES.forEach(t=>{
+    raw.itemsOn[t.key]=document.getElementById("on_"+t.key).checked;
+    raw.itemsStart[t.key]=Number(val("st_"+t.key));
+  });
+  const cfg=normalizeSettings(raw);
+  try{
+    const res=await withTimeout(tx(roomRef,current=>{
+      if(current.hostId!==clientId||current.phase!=="lobby")return;
+      current.settings=cfg;
+      current.logs.push("⚙️ 방장이 게임 설정을 변경했습니다.");
+      return current;
+    }));
+    if(!res.committed){
+      document.getElementById("settingsError").textContent="설정을 저장하지 못했습니다. 게임이 이미 시작되었거나 방장이 아닙니다.";
+      document.getElementById("settingsError").style.display="block";
+      return;
+    }
+    closeSettings();
+  }catch(e){
+    console.error(e);
+    const el=document.getElementById("settingsError");
+    el.textContent=explainError(e);
+    el.style.display="block";
+  }
+}
+
 /* ---------- 게임 화면 ---------- */
 function showGame(){
+  closeSettings();
   document.getElementById("setup").style.display="none";
   document.getElementById("game").style.display="block";
   document.getElementById("gameRoomCode").textContent=roomCode;
-  if(!boardBuilt){buildBoard();boardBuilt=true;}
+  if(boardTrack!==trackLen())buildBoard();
 }
 
 async function copyRoomCode(){
@@ -567,19 +785,25 @@ async function copyRoomCode(){
   }
 }
 
+function myIndex(){
+  return (roomData?.players||[]).findIndex(p=>p.id===clientId);
+}
+
 function updateUI(){
   if(!roomData)return;
   if(roomData.phase==="lobby"){renderLobbyPlayers();return}
 
+  const cfg=roomData.settings;
+  const TR=trackLen();
   const players=roomData.players;
   const current=roomData.current;
-  const meIndex=players.findIndex(p=>p.id===clientId);
+  const meIndex=myIndex();
   const isMyTurn=meIndex===current;
   const drawn=roomData.drawn;
   const queue=roomData.itemQueue;
   const me=players[meIndex];
+  const enabledItems=ITEM_TYPES.filter(t=>cfg.itemsOn[t.key]);
 
-  // 선택된 말이 유효하지 않으면 첫 번째 남은 말로
   if(me){
     const sp=me.pieces[selectedPiece];
     if(!sp||sp.done){
@@ -590,36 +814,52 @@ function updateUI(){
 
   document.getElementById("status").innerHTML=players.map((p,i)=>{
     const done=p.pieces.filter(x=>x.done).length;
+    const goal=cfg.goal||p.pieces.length;
+    const itemText=enabledItems.map(t=>`${t.label} ${p.items[t.key]}`).join(" · ");
     return `<div class="player ${i===current?"active":""}">
       <div class="name">${escapeHtml(p.name)}${p.id===clientId?" · 나":""}</div>
-      <div class="meta">통과 ${done}/4 · # ${p.sharp} · ♭ ${p.flat}</div>
+      <div class="meta">통과 ${done}/${goal}${itemText?"<br>"+itemText:""}</div>
     </div>`;
   }).join("");
 
   document.getElementById("turnName").textContent=players[current]?.name||"-";
-  document.getElementById("sharpCount").textContent=me?.sharp||0;
-  document.getElementById("flatCount").textContent=me?.flat||0;
   document.getElementById("drawCard").textContent=drawn?.name||"?";
+  document.getElementById("centerText").innerHTML=`FORMWHEEL<br>🎹<br><span style="font-size:.6em;color:#6b7280">${cfg.octaves}옥타브 · ${TR}칸</span>`;
 
-  const usedSharp=queue.filter(x=>x==="#").length;
-  const usedFlat=queue.filter(x=>x==="b").length;
-  document.getElementById("sharpUse").textContent=usedSharp?` (사용 ${usedSharp})`:"";
-  document.getElementById("flatUse").textContent=usedFlat?` (사용 ${usedFlat})`:"";
+  const canAct=isMyTurn&&!roomData.winner;
 
-  const row=document.getElementById("pieceRow");
-  if(me){
-    row.innerHTML=me.pieces.map((p,i)=>{
-      const text=p.done?"✓ 통과":`말 ${i+1} · ${p.pos}/${TRACK}`;
-      return `<button class="pieceBtn ${i===selectedPiece&&!p.done?"active":""} ${p.done?"done":""}" onclick="selectPiece(${i})" ${(!isMyTurn||p.done)?"disabled":""}>${text}</button>`;
+  // 아이템 카드
+  const itemRow=document.getElementById("itemRow");
+  if(!enabledItems.length){
+    itemRow.innerHTML=`<div class="itemInfo" style="grid-column:1/-1">이번 게임에서는 아이템을 사용하지 않습니다.</div>`;
+  }else{
+    itemRow.innerHTML=enabledItems.map(t=>{
+      const have=me?.items[t.key]||0;
+      if(t.key==="shield"){
+        return `<div class="itemBtn passive">${t.label} ${t.name} × ${have}</div>`;
+      }
+      const dis=!(canAct&&drawn!==null&&have>0);
+      if(t.key==="reroll"){
+        return `<button class="itemBtn" onclick="useReroll()" ${dis?"disabled":""}>${t.label} ${t.name} × ${have}</button>`;
+      }
+      const type=t.key==="sharp"?"#":t.key==="flat"?"b":"again";
+      const used=queue.filter(x=>x===type).length;
+      return `<button class="itemBtn ${used?"selected":""}" onclick="toggleItem('${type}')" ${dis?"disabled":""}>${t.label} ${t.name} × ${have}${used?` (사용 ${used})`:""}</button>`;
     }).join("");
   }
 
-  const canAct=isMyTurn&&!roomData.winner;
+  // 말 선택
+  const row=document.getElementById("pieceRow");
+  if(me){
+    row.innerHTML=me.pieces.map((p,i)=>{
+      const text=p.done?"✓ 통과":`말 ${i+1} · ${p.pos}/${TR}`;
+      return `<button class="pieceBtn ${i===selectedPiece&&!p.done?"active":""} ${p.done?"done":""}" onclick="selectPiece(${i})" ${(!isMyTurn||p.done)?"disabled":""}>${text}</button>`;
+    }).join("");
+  }else{
+    row.innerHTML="";
+  }
+
   document.getElementById("drawBtn").disabled=!(canAct&&drawn===null);
-  document.getElementById("sharpBtn").disabled=!(canAct&&drawn!==null&&(me?.sharp||0)>0);
-  document.getElementById("flatBtn").disabled=!(canAct&&drawn!==null&&(me?.flat||0)>0);
-  document.getElementById("sharpBtn").classList.toggle("selected",usedSharp>0);
-  document.getElementById("flatBtn").classList.toggle("selected",usedFlat>0);
   document.getElementById("moveBtn").disabled=!(canAct&&drawn!==null);
 
   const notice=document.getElementById("notice");
@@ -627,7 +867,7 @@ function updateUI(){
   else if(meIndex<0)notice.textContent="관전 중입니다.";
   else if(!isMyTurn)notice.textContent=`${players[current]?.name||"상대"}의 차례입니다.`;
   else if(drawn===null)notice.textContent="계이름 카드를 뽑아주세요.";
-  else notice.textContent=`${drawn.name}에 도착하도록 이동합니다. 필요하면 # 또는 ♭를 사용하세요.`;
+  else notice.textContent=`${drawn.name}에 도착하도록 이동합니다. 필요하면 아이템을 사용하세요.`;
 
   renderTokens();
   renderLogs();
@@ -641,12 +881,15 @@ function renderLogs(){
 }
 
 function buildBoard(){
+  const TR=trackLen();
   const board=document.getElementById("board");
   board.innerHTML="";
+  board.classList.toggle("dense",TR>24);
+  board.style.setProperty("--cell",Math.min(9,235/TR).toFixed(2));
   const SHARPS=[1,3,6,8,10];
-  for(let i=0;i<TRACK;i++){
+  for(let i=0;i<TR;i++){
     const pc=i%12;
-    const a=(i/TRACK)*Math.PI*2-Math.PI/2;
+    const a=(i/TR)*Math.PI*2-Math.PI/2;
     const r=42;
     const x=50+Math.cos(a)*r;
     const y=50+Math.sin(a)*r;
@@ -661,16 +904,18 @@ function buildBoard(){
     d.innerHTML=`${SEMI_NAMES[pc]}${extra}`;
     board.appendChild(d);
   }
+  boardTrack=TR;
 }
 
 function renderTokens(){
+  const TR=trackLen();
   const board=document.getElementById("board");
   board.querySelectorAll(".token-stack").forEach(x=>x.remove());
   roomData.players.forEach((p,pi)=>{
     p.pieces.forEach((piece,idx)=>{
       if(piece.done)return;
-      const cell=Math.min(Math.max(piece.pos,0),TRACK-1);
-      const a=(cell/TRACK)*Math.PI*2-Math.PI/2;
+      const cell=Math.min(Math.max(piece.pos,0),TR-1);
+      const a=(cell/TR)*Math.PI*2-Math.PI/2;
       const r=42;
       const x=50+Math.cos(a)*r;
       const y=50+Math.sin(a)*r;
@@ -695,7 +940,10 @@ function targetSemi(){
   const drawn=roomData?.drawn;
   if(!drawn)return null;
   let s=drawn.semi;
-  for(const item of roomData.itemQueue)s+=item==="#"?1:-1;
+  for(const item of roomData.itemQueue){
+    if(item==="#")s+=1;
+    else if(item==="b")s-=1;
+  }
   return ((s%12)+12)%12;
 }
 
@@ -709,26 +957,21 @@ function highlightTarget(){
   document.querySelectorAll(".key").forEach(k=>k.classList.remove("target","soft"));
   const t=targetSemi();
   if(t===null)return;
-  // 목표 음이 적힌 모든 칸을 연하게 표시
-  for(let i=0;i<TRACK;i++){
+  const TR=trackLen();
+  for(let i=0;i<TR;i++){
     if(i%12===t)document.getElementById("key"+i)?.classList.add("soft");
   }
-  // 내 차례라면 선택한 말이 실제로 도착할 칸을 진하게 표시 (통과하면 시작 칸)
   const mi=myIndex();
   if(mi>=0&&mi===roomData.current){
     const piece=roomData.players[mi].pieces[selectedPiece];
     if(piece&&!piece.done){
       const dest=nextDestination(piece.pos,t);
-      document.getElementById("key"+(dest>=TRACK?0:dest))?.classList.add("target");
+      document.getElementById("key"+(dest>=TR?0:dest))?.classList.add("target");
     }
   }
 }
 
 /* ---------- 게임 동작 ---------- */
-function myIndex(){
-  return (roomData?.players||[]).findIndex(p=>p.id===clientId);
-}
-
 async function drawNote(){
   if(!roomData)return;
   const me=myIndex();
@@ -736,10 +979,33 @@ async function drawNote(){
   try{
     await withTimeout(tx(roomRef,current=>{
       if(current.current!==me||current.drawn||current.winner)return;
-      const card=NATURAL[Math.floor(Math.random()*NATURAL.length)];
+      const card=drawCard(current.settings);
       current.drawn=card;
       current.itemQueue=[];
       current.logs.push(`${current.players[me].name} → ${card.name} 카드`);
+      return current;
+    }));
+  }catch(e){
+    console.error(e);
+    alert(explainError(e));
+  }
+}
+
+async function useReroll(){
+  if(!roomData?.drawn)return;
+  const me=myIndex();
+  if(me<0||me!==roomData.current)return;
+  try{
+    await withTimeout(tx(roomRef,current=>{
+      if(current.current!==me||!current.drawn||current.winner)return;
+      if(!current.settings.itemsOn.reroll)return;
+      const p=current.players[me];
+      if(!(p.items.reroll>0))return;
+      p.items.reroll-=1;
+      const card=drawCard(current.settings);
+      current.drawn=card;
+      current.itemQueue=[];
+      current.logs.push(`🎲 ${p.name}이(가) 다시 뽑기를 사용했습니다 → ${card.name} 카드`);
       return current;
     }));
   }catch(e){
@@ -752,19 +1018,18 @@ async function toggleItem(type){
   if(!roomData?.drawn)return;
   const me=myIndex();
   if(me<0||me!==roomData.current)return;
+  const key=QUEUE_ITEM[type];
+  if(!key)return;
   try{
     await withTimeout(tx(roomRef,current=>{
       if(current.current!==me||!current.drawn)return;
-      const p=current.players[me];
-      const have=type==="#"?p.sharp:p.flat;
+      if(!current.settings.itemsOn[key])return;
+      const have=current.players[me].items[key]||0;
       if(have<=0)return;
+      const cap=type==="again"?1:have;
       const used=current.itemQueue.filter(x=>x===type).length;
-      if(used>=have){
-        // 보유 수만큼 골랐다면 해제
-        current.itemQueue=current.itemQueue.filter(x=>x!==type);
-      }else{
-        current.itemQueue.push(type);
-      }
+      if(used>=cap)current.itemQueue=current.itemQueue.filter(x=>x!==type);
+      else current.itemQueue.push(type);
       return current;
     }));
   }catch(e){
@@ -786,11 +1051,13 @@ async function moveSelected(){
   if(busy||!roomData?.drawn)return;
   const me=myIndex();
   if(me<0||me!==roomData.current)return;
-  const wantedPiece=selectedPiece; // 내가 고른 말을 서버 트랜잭션에 전달
+  const wantedPiece=selectedPiece;
   busy=true;
   try{
     await withTimeout(tx(roomRef,current=>{
       if(current.current!==me||!current.drawn||current.winner)return;
+      const cfg=current.settings;
+      const TR=12*cfg.octaves;
       const p=current.players[me];
 
       let idx=wantedPiece;
@@ -801,44 +1068,68 @@ async function moveSelected(){
       const queue=current.itemQueue.slice();
       const needSharp=queue.filter(x=>x==="#").length;
       const needFlat=queue.filter(x=>x==="b").length;
-      if(needSharp>p.sharp||needFlat>p.flat)return;
+      const useAgain=queue.includes("again");
+      if(needSharp>p.items.sharp||needFlat>p.items.flat||(useAgain&&p.items.again<1))return;
 
       let target=current.drawn.semi;
-      for(const item of queue)target+=item==="#"?1:-1;
+      for(const item of queue){
+        if(item==="#")target+=1;
+        else if(item==="b")target-=1;
+      }
       target=((target%12)+12)%12;
 
       const dest=nextDestination(piece.pos,target);
       const passedDo=Math.floor(dest/12)>Math.floor(piece.pos/12);
 
-      if(passedDo){
-        p.sharp+=1;
-        current.logs.push(`${p.name}이(가) 도를 지나 아이템 카드 1장을 얻었습니다. (# +1)`);
+      // 도를 지나면 보상 아이템
+      if(passedDo&&cfg.passReward>0){
+        const pool=ITEM_TYPES.filter(t=>cfg.itemsOn[t.key]);
+        if(pool.length){
+          const got=[];
+          for(let k=0;k<cfg.passReward;k++){
+            const t=pool[Math.floor(Math.random()*pool.length)];
+            p.items[t.key]+=1;
+            got.push(`${t.label} ${t.name}`);
+          }
+          current.logs.push(`${p.name}이(가) 도를 지나 아이템을 얻었습니다: ${got.join(", ")}`);
+        }
       }
 
       piece.pos=dest;
 
-      p.sharp=Math.max(0,p.sharp-needSharp);
-      p.flat=Math.max(0,p.flat-needFlat);
+      // 사용한 아이템 소모
+      p.items.sharp=Math.max(0,p.items.sharp-needSharp);
+      p.items.flat=Math.max(0,p.items.flat-needFlat);
+      if(useAgain)p.items.again=Math.max(0,p.items.again-1);
 
-      current.players.forEach((op,oi)=>{
-        if(oi===me)return;
-        op.pieces.forEach((other,oj)=>{
-          if(other.done)return;
-          if(other.pos===piece.pos){
-            other.pos=Math.max(0,other.pos-12);
-            current.logs.push(`⚔️ ${p.name}이(가) ${op.name}의 말 ${oj+1}과 충돌! 상대 말이 1옥타브 뒤로 이동합니다.`);
-          }
+      // 충돌
+      if(cfg.collisionBack>0){
+        current.players.forEach((op,oi)=>{
+          if(oi===me)return;
+          op.pieces.forEach((other,oj)=>{
+            if(other.done||other.pos!==piece.pos)return;
+            if(op.items.shield>0){
+              op.items.shield-=1;
+              current.logs.push(`🛡 ${op.name}의 말 ${oj+1}이(가) 방어 카드로 ${p.name}의 충돌을 막았습니다!`);
+              return;
+            }
+            other.pos=Math.max(0,other.pos-12*cfg.collisionBack);
+            current.logs.push(`⚔️ ${p.name}이(가) ${op.name}의 말 ${oj+1}과 충돌! 상대 말이 ${cfg.collisionBack}옥타브 뒤로 이동합니다.`);
+          });
         });
-      });
+      }
 
-      if(piece.pos>=TRACK){
+      // 통과
+      if(piece.pos>=TR){
         piece.done=true;
-        piece.pos=TRACK;
+        piece.pos=TR;
         current.logs.push(`🏁 ${p.name}의 말 ${idx+1}이(가) 통과했습니다!`);
-        if(p.pieces.every(x=>x.done)){
+        const doneCount=p.pieces.filter(x=>x.done).length;
+        const goal=cfg.goal||p.pieces.length;
+        if(doneCount>=goal){
           current.winner=p.name;
           current.phase="finished";
-          current.logs.push(`🎉 ${p.name}이(가) 네 개의 말을 모두 통과시켰습니다!`);
+          current.logs.push(`🎉 ${p.name}이(가) 말 ${goal}개를 통과시켜 승리했습니다!`);
           current.drawn=null;
           current.itemQueue=[];
           return current;
@@ -849,8 +1140,12 @@ async function moveSelected(){
 
       current.drawn=null;
       current.itemQueue=[];
-      current.current=(current.current+1)%current.players.length;
-      current.logs.push(`${current.players[current.current].name}의 차례입니다.`);
+      if(useAgain){
+        current.logs.push(`⏭ ${p.name}이(가) 한 번 더 진행합니다!`);
+      }else{
+        current.current=(current.current+1)%current.players.length;
+        current.logs.push(`${current.players[current.current].name}의 차례입니다.`);
+      }
       return current;
     }));
   }catch(e){
@@ -863,7 +1158,7 @@ async function moveSelected(){
 
 function showWinner(name){
   document.getElementById("winTitle").textContent="🎉 승리!";
-  document.getElementById("winText").textContent=`${name}이(가) 네 개의 말을 모두 통과시켰습니다!`;
+  document.getElementById("winText").textContent=`${name}이(가) 승리했습니다!`;
   document.getElementById("modal").style.display="flex";
 }
 
