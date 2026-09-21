@@ -100,6 +100,7 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
   <section id="setup" class="panel setup">
     <h1>🎹 Formwheel_Piano</h1>
     <div class="sub">Firebase 실시간 멀티플레이어 피아노 보드게임</div>
+    <div id="conn" style="font-size:13px;font-weight:800;color:#6b7280;margin:-12px 0 14px">⏳ 서버 연결 확인 중...</div>
 
     <div id="roomMenu">
       <label>내 이름</label>
@@ -226,6 +227,14 @@ const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
 window.__fwBooted=true;
 
+onValue(ref(db,".info/connected"),snap=>{
+  const el=document.getElementById("conn");
+  if(!el)return;
+  const ok=snap.val()===true;
+  el.textContent=ok?"🟢 서버 연결됨":"🔴 서버에 연결되지 않음 (연결 중이거나 databaseURL/네트워크 문제)";
+  el.style.color=ok?"#16a34a":"#b91c1c";
+});
+
 const ROOT="pianoRooms";
 const NATURAL=[
   {name:"도",semi:0},{name:"레",semi:2},{name:"미",semi:4},{name:"파",semi:5},
@@ -234,20 +243,10 @@ const NATURAL=[
 const SEMI_NAMES=["도","도♯","레","레♯","미","파","파♯","솔","솔♯","라","라♯","시"];
 const COLORS=["c0","c1","c2","c3"];
 
-/* 탭마다 다른 ID를 쓴다.
-   (localStorage를 쓰면 같은 브라우저의 두 탭이 같은 사람으로 취급되어
-    혼자 테스트할 때 참가가 안 되는 것처럼 보임. sessionStorage는 새로고침해도 유지됨) */
-function loadClientId(){
-  const KEY="formwheel_piano_client_id";
-  let id=null;
-  try{id=sessionStorage.getItem(KEY);}catch(e){}
-  if(!id){
-    id=Math.random().toString(36).slice(2)+Date.now().toString(36);
-    try{sessionStorage.setItem(KEY,id);}catch(e){}
-  }
-  return id;
-}
-const clientId=loadClientId();
+/* 페이지를 열 때마다 새 ID를 만든다.
+   (localStorage는 탭끼리 공유되고, sessionStorage도 '탭 복제'나 링크로 연 탭에는 복사돼서
+    같은 브라우저에서 테스트하면 두 탭이 같은 사람으로 취급될 수 있음) */
+const clientId=(crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now().toString(36));
 
 let roomCode="";
 let roomRef=null;
@@ -392,6 +391,12 @@ async function createRoom(){
     if(!code){showError("방을 만들 수 없습니다. 잠시 후 다시 시도해주세요.");return}
     const r=ref(db,ROOT+"/"+code);
     await withTimeout(set(r,initialState([makePlayer(myName)])));
+    // 서버에 실제로 저장됐는지 다시 읽어서 확인
+    const check=await withTimeout(get(r));
+    if(!check.exists()){
+      showError("방을 서버에 저장하지 못했습니다.\nFirebase 규칙(pianoRooms 쓰기 허용)과 databaseURL을 확인해주세요.");
+      return;
+    }
     roomCode=code;
     roomRef=r;
     openListener();
