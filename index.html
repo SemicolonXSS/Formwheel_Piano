@@ -10,6 +10,7 @@
 html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f7f8fc;color:#171923}
 button,input,select{font:inherit}
 button{cursor:pointer;border:0}
+button:disabled{cursor:not-allowed}
 .header{position:sticky;top:0;z-index:20;height:68px;padding:0 22px;display:flex;align-items:center;background:rgba(255,255,255,.9);backdrop-filter:blur(14px);border-bottom:1px solid #e6e8ee}
 .logo{font-size:23px;font-weight:900;letter-spacing:-1px;cursor:pointer}
 .logo .wheel{display:inline-flex;width:25px;height:25px;border:5px solid #7c3aed;border-radius:50%;vertical-align:-5px;margin:0 4px;position:relative}
@@ -22,6 +23,7 @@ h1{margin:0;font-size:32px;letter-spacing:-1.5px}
 label{display:block;font-weight:800;margin:15px 0 7px}
 input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius:12px;background:#fff}
 .primary{width:100%;margin-top:14px;padding:14px;border-radius:13px;background:#7c3aed;color:#fff;font-weight:900}
+.primary:disabled{opacity:.5}
 .secondary{width:100%;margin-top:10px;padding:13px;border-radius:13px;background:#111827;color:#fff;font-weight:900}
 .roomBox{padding:17px;border-radius:17px;background:#f7f5ff;border:1px solid #e8e0ff;margin-top:16px}
 .roomCode{font-size:34px;font-weight:1000;letter-spacing:7px;text-align:center;color:#6d28d9;margin:7px 0}
@@ -29,7 +31,7 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
 .playersWaiting{margin-top:13px;display:grid;gap:7px}
 .waitPlayer{padding:10px 12px;border-radius:11px;background:#fff;border:1px solid #e5e7eb;font-weight:800}
 .rules{margin-top:20px;padding:16px;border-radius:15px;background:#f7f5ff;color:#4c1d95;line-height:1.65;font-size:14px}
-.error{display:none;margin-top:12px;padding:12px;border-radius:12px;background:#fef2f2;color:#b91c1c;font-size:13px;line-height:1.5}
+.error{display:none;margin-top:12px;padding:12px;border-radius:12px;background:#fef2f2;color:#b91c1c;font-size:13px;line-height:1.5;white-space:pre-line}
 .game{display:none}
 .status{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
 .player{padding:13px;background:#fff;border:2px solid #e5e7eb;border-radius:16px}
@@ -56,16 +58,19 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
 .drawCard{width:95px;height:95px;border-radius:18px;background:#f7f8fc;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:1000}
 .action{flex:1}
 .action button{width:100%;padding:12px;border-radius:12px;background:#111827;color:#fff;font-weight:900}
-.action button:disabled{opacity:.45;cursor:not-allowed}
+.action button:disabled{opacity:.45}
 .itemRow{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
 .itemBtn{padding:13px;border-radius:12px;background:#f3f4f6;color:#111827;font-weight:900;border:2px solid transparent}
 .itemBtn.selected{background:#f5f3ff;border-color:#7c3aed;color:#6d28d9}
-.itemBtn:disabled{opacity:.4;cursor:not-allowed}
+.itemBtn:disabled{opacity:.4}
 .itemInfo{margin:10px 0 0;color:#6b7280;font-size:13px;line-height:1.5}
 .pieceRow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
 .pieceBtn{padding:12px 7px;border-radius:11px;background:#f3f4f6;font-weight:800;color:#111827}
 .pieceBtn.active{background:#111827;color:#fff}
 .pieceBtn.done{background:#dcfce7;color:#166534}
+.pieceBtn:disabled{opacity:.6}
+.moveBtn{width:100%;margin-top:10px;padding:13px;border-radius:12px;background:#7c3aed;color:#fff;font-weight:900}
+.moveBtn:disabled{opacity:.45}
 .notice{margin-top:12px;padding:13px 15px;border-radius:13px;background:#fafafa;border:1px solid #e5e7eb;font-size:14px;line-height:1.5}
 .log{margin-top:14px;padding:14px;background:#111827;color:#e5e7eb;border-radius:15px;height:150px;overflow:auto;font-size:13px;line-height:1.6}
 .roomBar{margin-bottom:14px;padding:12px 15px;background:#fff;border:1px solid #e5e7eb;border-radius:15px;display:flex;justify-content:space-between;align-items:center;gap:10px}
@@ -94,17 +99,17 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
 <main class="wrap">
   <section id="setup" class="panel setup">
     <h1>🎹 Formwheel_Piano</h1>
-    <div class="sub">실시간 멀티플레이어 피아노 보드게임</div>
+    <div class="sub">Firebase 실시간 멀티플레이어 피아노 보드게임</div>
 
     <div id="roomMenu">
       <label>내 이름</label>
       <input id="myName" maxlength="12" placeholder="닉네임">
 
-      <button class="primary" onclick="createRoom()">🎵 방 만들기</button>
+      <button id="createBtn" class="primary" onclick="createRoom()">🎵 방 만들기</button>
 
       <label>방 코드로 참가</label>
       <input id="joinCode" maxlength="4" inputmode="numeric" placeholder="예: 1234">
-      <button class="secondary" onclick="joinRoom()">🚪 방 참가</button>
+      <button id="joinBtn" class="secondary" onclick="joinRoom()">🚪 방 참가</button>
 
       <div id="error" class="error"></div>
 
@@ -161,11 +166,11 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
       <section class="box">
         <b>아이템 카드</b>
         <div class="itemRow">
-          <button id="sharpBtn" class="itemBtn" onclick="toggleItem('#')"># × <span id="sharpCount">0</span></button>
-          <button id="flatBtn" class="itemBtn" onclick="toggleItem('b')">♭ × <span id="flatCount">0</span></button>
+          <button id="sharpBtn" class="itemBtn" onclick="toggleItem('#')"># × <span id="sharpCount">0</span><span id="sharpUse"></span></button>
+          <button id="flatBtn" class="itemBtn" onclick="toggleItem('b')">♭ × <span id="flatCount">0</span><span id="flatUse"></span></button>
         </div>
         <div class="itemInfo">
-          이번 이동에 사용할 아이템입니다. 여러 장을 연속으로 선택할 수 있습니다.
+          이번 이동에 사용할 아이템입니다. 버튼을 누를 때마다 1장씩 추가되고, 보유 수만큼 누르면 다시 해제됩니다.
         </div>
       </section>
     </div>
@@ -173,7 +178,7 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
     <section class="box" style="margin-top:14px">
       <b>움직일 말 선택</b>
       <div id="pieceRow" class="pieceRow"></div>
-      <button id="moveBtn" style="width:100%;margin-top:10px;padding:13px;border-radius:12px;background:#7c3aed;color:white;font-weight:900" onclick="moveSelected()">🎵 선택한 말 이동하기</button>
+      <button id="moveBtn" class="moveBtn" onclick="moveSelected()">🎵 선택한 말 이동하기</button>
     </section>
 
     <div id="log" class="log"></div>
@@ -187,6 +192,20 @@ input,select{width:100%;padding:12px 13px;border:1px solid #d5d8df;border-radius
     <button onclick="location.reload()">다시 하기</button>
   </div>
 </div>
+
+<!-- Firebase 라이브러리 로드 실패 감지용 -->
+<script>
+window.__fwBooted=false;
+setTimeout(function(){
+  if(!window.__fwBooted){
+    var el=document.getElementById("error");
+    if(el){
+      el.textContent="Firebase 라이브러리를 불러오지 못했습니다.\n인터넷 연결 또는 광고/보안 차단 프로그램을 확인한 뒤 새로고침해주세요.";
+      el.style.display="block";
+    }
+  }
+},5000);
+</script>
 
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
@@ -205,7 +224,9 @@ const firebaseConfig={
 
 const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
+window.__fwBooted=true;
 
+const ROOT="pianoRooms";
 const NATURAL=[
   {name:"도",semi:0},{name:"레",semi:2},{name:"미",semi:4},{name:"파",semi:5},
   {name:"솔",semi:7},{name:"라",semi:9},{name:"시",semi:11}
@@ -213,17 +234,29 @@ const NATURAL=[
 const SEMI_NAMES=["도","도♯","레","레♯","미","파","파♯","솔","솔♯","라","라♯","시"];
 const COLORS=["c0","c1","c2","c3"];
 
+/* 탭마다 다른 ID를 쓴다.
+   (localStorage를 쓰면 같은 브라우저의 두 탭이 같은 사람으로 취급되어
+    혼자 테스트할 때 참가가 안 되는 것처럼 보임. sessionStorage는 새로고침해도 유지됨) */
+function loadClientId(){
+  const KEY="formwheel_piano_client_id";
+  let id=null;
+  try{id=sessionStorage.getItem(KEY);}catch(e){}
+  if(!id){
+    id=Math.random().toString(36).slice(2)+Date.now().toString(36);
+    try{sessionStorage.setItem(KEY,id);}catch(e){}
+  }
+  return id;
+}
+const clientId=loadClientId();
+
 let roomCode="";
 let roomRef=null;
 let unsubscribe=null;
-let clientId=localStorage.getItem("formwheel_piano_client_id");
-if(!clientId){
-  clientId=Math.random().toString(36).slice(2)+Date.now().toString(36);
-  localStorage.setItem("formwheel_piano_client_id",clientId);
-}
 let myName="";
 let roomData=null;
 let selectedPiece=0;
+let busy=false;
+let boardBuilt=false;
 
 window.goHome=()=>location.href="https://semicolonxss.github.io/Formwheel/";
 window.createRoom=createRoom;
@@ -235,6 +268,78 @@ window.drawNote=drawNote;
 window.toggleItem=toggleItem;
 window.selectPiece=selectPiece;
 window.moveSelected=moveSelected;
+
+/* ---------- 유틸 ---------- */
+function withTimeout(p,ms=12000){
+  return Promise.race([
+    p,
+    new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")),ms))
+  ]);
+}
+
+function explainError(e){
+  const raw=String((e&&(e.code||e.message))||e);
+  if(/permission/i.test(raw)){
+    return "Firebase 보안 규칙 때문에 접근이 거부되었습니다 (permission_denied).\nRealtime Database → 규칙에서 pianoRooms 경로의 읽기/쓰기를 허용해주세요.";
+  }
+  if(/timeout/i.test(raw)){
+    return "서버 응답이 없습니다.\n인터넷 연결, databaseURL 설정, 방화벽/VPN을 확인해주세요.";
+  }
+  if(/offline|network|unavailable|disconnected/i.test(raw)){
+    return "Firebase 서버에 연결할 수 없습니다. 인터넷 연결을 확인해주세요.";
+  }
+  return "오류가 발생했습니다: "+raw;
+}
+
+function showError(text){
+  ["error","lobbyError"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.textContent=text;el.style.display="block";}
+  });
+}
+function clearError(){
+  ["error","lobbyError"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.style.display="none";
+  });
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+
+/* Firebase는 null/빈 배열을 저장하지 않아서 읽어오면 필드가 사라진다.
+   항상 같은 모양으로 맞춰서 사용한다. */
+function toArray(v){
+  if(Array.isArray(v))return v;
+  if(v&&typeof v==="object")return Object.values(v);
+  return [];
+}
+function normalize(d){
+  if(!d)return null;
+  d.players=toArray(d.players);
+  d.players.forEach(p=>{
+    p.pieces=toArray(p.pieces);
+    p.sharp=p.sharp||0;
+    p.flat=p.flat||0;
+  });
+  d.itemQueue=toArray(d.itemQueue);
+  d.logs=toArray(d.logs);
+  d.drawn=d.drawn||null;
+  d.winner=d.winner||null;
+  d.current=d.current||0;
+  return d;
+}
+
+/* 트랜잭션 헬퍼.
+   첫 실행 때 current가 null일 수 있는데, 여기서 undefined를 반환하면 트랜잭션이 바로 취소된다.
+   null을 그대로 반환하면 SDK가 서버의 실제 값으로 다시 실행해준다. */
+function tx(ref_,fn){
+  return runTransaction(ref_,cur=>{
+    if(cur===null)return cur;
+    normalize(cur);
+    return fn(cur);
+  });
+}
 
 function makeCode(){
   return String(Math.floor(1000+Math.random()*9000));
@@ -256,7 +361,6 @@ function initialState(players){
     hostId:players[0].id,
     current:0,
     drawn:null,
-    selectedPiece:0,
     itemQueue:[],
     players,
     winner:null,
@@ -264,124 +368,184 @@ function initialState(players){
   };
 }
 
+function setBusy(v){
+  busy=v;
+  ["createBtn","joinBtn"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.disabled=v;
+  });
+}
+
+/* ---------- 방 만들기 / 참가 ---------- */
 async function createRoom(){
+  if(busy)return;
   clearError();
   myName=(document.getElementById("myName").value.trim()||"플레이어 1").slice(0,12);
-  let code="";
-  for(let i=0;i<20;i++){
-    const c=makeCode();
-    const snap=await get(ref(db,"pianoRooms/"+c));
-    if(!snap.exists()){code=c;break;}
+  setBusy(true);
+  try{
+    let code="";
+    for(let i=0;i<20;i++){
+      const c=makeCode();
+      const snap=await withTimeout(get(ref(db,ROOT+"/"+c)));
+      if(!snap.exists()){code=c;break;}
+    }
+    if(!code){showError("방을 만들 수 없습니다. 잠시 후 다시 시도해주세요.");return}
+    const r=ref(db,ROOT+"/"+code);
+    await withTimeout(set(r,initialState([makePlayer(myName)])));
+    roomCode=code;
+    roomRef=r;
+    openListener();
+    showLobby();
+  }catch(e){
+    console.error(e);
+    showError(explainError(e));
+  }finally{
+    setBusy(false);
   }
-  if(!code){showError("방을 만들 수 없습니다. 잠시 후 다시 시도해주세요.");return}
-  roomCode=code;
-  roomRef=ref(db,"pianoRooms/"+roomCode);
-  await set(roomRef,initialState([makePlayer(myName)]));
-  openListener();
-  showLobby();
 }
 
 async function joinRoom(){
+  if(busy)return;
   clearError();
   myName=(document.getElementById("myName").value.trim()||"플레이어").slice(0,12);
   const code=document.getElementById("joinCode").value.trim();
   if(!/^\d{4}$/.test(code)){showError("4자리 방 코드를 입력해주세요.");return}
-  const r=ref(db,"pianoRooms/"+code);
-  const snap=await get(r);
-  if(!snap.exists()){showError("존재하지 않는 방입니다.");return}
-  const data=snap.val();
-  if(data.phase!=="lobby"){showError("이미 시작된 게임입니다.");return}
-  if((data.players||[]).length>=4){showError("방이 가득 찼습니다. 최대 4명입니다.");return}
-  roomCode=code;roomRef=r;
-  const player=makePlayer(myName);
-  await runTransaction(roomRef,current=>{
-    if(!current||current.phase!=="lobby") return;
-    current.players=current.players||[];
-    if(current.players.length>=4) return;
-    if(current.players.some(p=>p.id===clientId)) return current;
-    current.players.push(player);
-    current.logs=current.logs||[];
-    current.logs.push(`${player.name}이 방에 참가했습니다.`);
-    return current;
-  });
-  openListener();
-  showLobby();
+  setBusy(true);
+  try{
+    const r=ref(db,ROOT+"/"+code);
+
+    // 1) 방이 있는지 서버에서 직접 확인
+    const snap=await withTimeout(get(r));
+    if(!snap.exists()){
+      showError(`${code}번 방을 찾을 수 없습니다.\n코드를 다시 확인하거나, 방장이 방을 나가지 않았는지 확인해주세요.`);
+      return;
+    }
+
+    // 2) 트랜잭션으로 참가 (동시에 여러 명이 들어와도 안전)
+    const player=makePlayer(myName);
+    let reason="";
+    const res=await withTimeout(runTransaction(r,cur=>{
+      if(cur===null)return cur; // 서버 값으로 재시도 유도
+      normalize(cur);
+      reason="";
+      if(cur.players.some(p=>p.id===clientId))return cur; // 이미 참가한 사람 (재접속)
+      if(cur.phase!=="lobby"){reason="started";return;}
+      if(cur.players.length>=4){reason="full";return;}
+      cur.players.push(player);
+      cur.logs.push(`${player.name}이 방에 참가했습니다.`);
+      return cur;
+    }));
+
+    if(!res.committed){
+      if(reason==="started")showError("이미 시작된 게임입니다.");
+      else if(reason==="full")showError("방이 가득 찼습니다. 최대 4명입니다.");
+      else showError("방에 참가하지 못했습니다. 다시 시도해주세요.");
+      return;
+    }
+    if(!res.snapshot.exists()){
+      showError("방이 방금 삭제되었습니다.");
+      return;
+    }
+
+    roomCode=code;
+    roomRef=r;
+    openListener();
+    showLobby();
+  }catch(e){
+    console.error(e);
+    showError(explainError(e));
+  }finally{
+    setBusy(false);
+  }
 }
 
 function openListener(){
-  if(unsubscribe) unsubscribe();
+  if(unsubscribe)unsubscribe();
   unsubscribe=onValue(roomRef,snap=>{
-    roomData=snap.val();
-    if(!roomData){showError("방이 삭제되었습니다.");return}
-    if(roomData.phase==="lobby") showLobby();
-    else {
-      showGame();
-      if(roomData.winner) showWinner(roomData.winner);
+    roomData=normalize(snap.val());
+    if(!roomData){
+      alert("방이 삭제되었습니다.");
+      location.reload();
+      return;
     }
+    if(roomData.phase==="lobby")showLobby();
+    else showGame();
     updateUI();
+    if(roomData.winner)showWinner(roomData.winner);
+  },err=>{
+    console.error(err);
+    showError(explainError(err));
   });
 }
 
+/* ---------- 로비 ---------- */
 function showLobby(){
   document.getElementById("roomMenu").style.display="none";
   document.getElementById("lobby").style.display="block";
   document.getElementById("setup").style.display="block";
+  document.getElementById("game").style.display="none";
   document.getElementById("lobbyCode").textContent=roomCode||"----";
   renderLobbyPlayers();
 }
 
 function renderLobbyPlayers(){
   if(!roomData)return;
+  const players=roomData.players;
   const el=document.getElementById("waitingPlayers");
-  el.innerHTML=(roomData.players||[]).map((p,i)=>
+  el.innerHTML=players.map((p,i)=>
     `<div class="waitPlayer">${i===0?"👑 ":""}${escapeHtml(p.name)}${p.id===clientId?" (나)":""}</div>`
   ).join("");
   const host=roomData.hostId===clientId;
   const btn=document.getElementById("startGameBtn");
   btn.style.display=host?"block":"none";
-  btn.disabled=(roomData.players||[]).length<2;
-  btn.textContent=(roomData.players||[]).length<2?"👥 2명 이상 필요":"🎮 게임 시작";
+  btn.disabled=players.length<2;
+  btn.textContent=players.length<2?"👥 2명 이상 필요":"🎮 게임 시작";
 }
 
 async function hostStartGame(){
   if(!roomData||roomData.hostId!==clientId)return;
-  await runTransaction(roomRef,current=>{
-    if(!current||current.hostId!==clientId||current.phase!=="lobby")return;
-    if((current.players||[]).length<2)return;
-    current.phase="game";
-    current.current=0;
-    current.drawn=null;
-    current.selectedPiece=0;
-    current.itemQueue=[];
-    current.logs=current.logs||[];
-    current.logs.push("🎵 게임이 시작되었습니다!");
-    return current;
-  });
+  clearError();
+  try{
+    await withTimeout(tx(roomRef,current=>{
+      if(current.hostId!==clientId||current.phase!=="lobby")return;
+      if(current.players.length<2)return;
+      current.phase="game";
+      current.current=0;
+      current.drawn=null;
+      current.itemQueue=[];
+      current.logs.push("🎵 게임이 시작되었습니다!");
+      return current;
+    }));
+  }catch(e){
+    console.error(e);
+    showError(explainError(e));
+  }
 }
 
 async function leaveRoom(){
-  if(!roomRef){location.reload();return}
-  try{
-    await runTransaction(roomRef,current=>{
-      if(!current)return;
-      current.players=(current.players||[]).filter(p=>p.id!==clientId);
-      if(current.players.length===0)return null;
-      if(current.hostId===clientId){
-        current.hostId=current.players[0].id;
-        current.logs=current.logs||[];
-        current.logs.push(`${current.players[0].name}이 새 호스트가 되었습니다.`);
-      }
-      return current;
-    });
-  }catch(e){}
+  if(unsubscribe){unsubscribe();unsubscribe=null;}
+  if(roomRef){
+    try{
+      await withTimeout(tx(roomRef,current=>{
+        current.players=current.players.filter(p=>p.id!==clientId);
+        if(current.players.length===0)return null; // 빈 방 삭제
+        if(current.hostId===clientId){
+          current.hostId=current.players[0].id;
+          current.logs.push(`${current.players[0].name}이 새 호스트가 되었습니다.`);
+        }
+        return current;
+      }),6000);
+    }catch(e){console.error(e);}
+  }
   location.reload();
 }
 
+/* ---------- 게임 화면 ---------- */
 function showGame(){
   document.getElementById("setup").style.display="none";
   document.getElementById("game").style.display="block";
   document.getElementById("gameRoomCode").textContent=roomCode;
-  buildBoard();
+  if(!boardBuilt){buildBoard();boardBuilt=true;}
 }
 
 async function copyRoomCode(){
@@ -397,47 +561,62 @@ function updateUI(){
   if(!roomData)return;
   if(roomData.phase==="lobby"){renderLobbyPlayers();return}
 
-  const players=roomData.players||[];
-  const current=roomData.current||0;
+  const players=roomData.players;
+  const current=roomData.current;
   const meIndex=players.findIndex(p=>p.id===clientId);
   const isMyTurn=meIndex===current;
   const drawn=roomData.drawn;
-  const queue=roomData.itemQueue||[];
+  const queue=roomData.itemQueue;
+  const me=players[meIndex];
 
-  const status=document.getElementById("status");
-  status.innerHTML=players.map((p,i)=>{
-    const done=(p.pieces||[]).filter(x=>x.done).length;
+  // 선택된 말이 유효하지 않으면 첫 번째 남은 말로
+  if(me){
+    const sp=me.pieces[selectedPiece];
+    if(!sp||sp.done){
+      const f=me.pieces.findIndex(x=>!x.done);
+      selectedPiece=f<0?0:f;
+    }
+  }
+
+  document.getElementById("status").innerHTML=players.map((p,i)=>{
+    const done=p.pieces.filter(x=>x.done).length;
     return `<div class="player ${i===current?"active":""}">
       <div class="name">${escapeHtml(p.name)}${p.id===clientId?" · 나":""}</div>
-      <div class="meta">통과 ${done}/4 · # ${p.sharp||0} · ♭ ${p.flat||0}</div>
+      <div class="meta">통과 ${done}/4 · # ${p.sharp} · ♭ ${p.flat}</div>
     </div>`;
   }).join("");
 
   document.getElementById("turnName").textContent=players[current]?.name||"-";
-  document.getElementById("sharpCount").textContent=players[meIndex]?.sharp||0;
-  document.getElementById("flatCount").textContent=players[meIndex]?.flat||0;
+  document.getElementById("sharpCount").textContent=me?.sharp||0;
+  document.getElementById("flatCount").textContent=me?.flat||0;
   document.getElementById("drawCard").textContent=drawn?.name||"?";
 
+  const usedSharp=queue.filter(x=>x==="#").length;
+  const usedFlat=queue.filter(x=>x==="b").length;
+  document.getElementById("sharpUse").textContent=usedSharp?` (사용 ${usedSharp})`:"";
+  document.getElementById("flatUse").textContent=usedFlat?` (사용 ${usedFlat})`:"";
+
   const row=document.getElementById("pieceRow");
-  if(meIndex>=0){
-    row.innerHTML=(players[meIndex].pieces||[]).map((p,i)=>{
+  if(me){
+    row.innerHTML=me.pieces.map((p,i)=>{
       const text=p.done?"✓ 통과":`말 ${i+1} · ${p.pos}칸`;
-      return `<button class="pieceBtn ${i===selectedPiece?"active":""} ${p.done?"done":""}" onclick="selectPiece(${i})" ${(!isMyTurn||p.done)?"disabled":""}>${text}</button>`;
+      return `<button class="pieceBtn ${i===selectedPiece&&!p.done?"active":""} ${p.done?"done":""}" onclick="selectPiece(${i})" ${(!isMyTurn||p.done)?"disabled":""}>${text}</button>`;
     }).join("");
   }
 
   const canAct=isMyTurn&&!roomData.winner;
   document.getElementById("drawBtn").disabled=!(canAct&&drawn===null);
-  document.getElementById("sharpBtn").disabled=!(canAct&&drawn!==null&&(players[meIndex]?.sharp||0)>0);
-  document.getElementById("flatBtn").disabled=!(canAct&&drawn!==null&&(players[meIndex]?.flat||0)>0);
-  document.getElementById("sharpBtn").classList.toggle("selected",queue.includes("#"));
-  document.getElementById("flatBtn").classList.toggle("selected",queue.includes("b"));
+  document.getElementById("sharpBtn").disabled=!(canAct&&drawn!==null&&(me?.sharp||0)>0);
+  document.getElementById("flatBtn").disabled=!(canAct&&drawn!==null&&(me?.flat||0)>0);
+  document.getElementById("sharpBtn").classList.toggle("selected",usedSharp>0);
+  document.getElementById("flatBtn").classList.toggle("selected",usedFlat>0);
   document.getElementById("moveBtn").disabled=!(canAct&&drawn!==null);
 
   const notice=document.getElementById("notice");
-  if(roomData.winner) notice.textContent="게임 종료";
-  else if(!isMyTurn) notice.textContent=`${players[current]?.name||"상대"}의 차례입니다.`;
-  else if(drawn===null) notice.textContent="계이름 카드를 뽑아주세요.";
+  if(roomData.winner)notice.textContent="게임 종료";
+  else if(meIndex<0)notice.textContent="관전 중입니다.";
+  else if(!isMyTurn)notice.textContent=`${players[current]?.name||"상대"}의 차례입니다.`;
+  else if(drawn===null)notice.textContent="계이름 카드를 뽑아주세요.";
   else notice.textContent=`${drawn.name}에 도착하도록 이동합니다. 필요하면 # 또는 ♭를 사용하세요.`;
 
   renderTokens();
@@ -446,9 +625,8 @@ function updateUI(){
 }
 
 function renderLogs(){
-  const logs=roomData.logs||[];
-  document.getElementById("log").innerHTML=logs.slice(-80).map(x=>`<div>• ${escapeHtml(x)}</div>`).join("");
   const el=document.getElementById("log");
+  el.innerHTML=roomData.logs.slice(-80).map(x=>`<div>• ${escapeHtml(x)}</div>`).join("");
   el.scrollTop=el.scrollHeight;
 }
 
@@ -472,9 +650,8 @@ function buildBoard(){
 
 function renderTokens(){
   document.querySelectorAll(".token-stack").forEach(x=>x.remove());
-  const players=roomData?.players||[];
-  players.forEach((p,pi)=>{
-    (p.pieces||[]).forEach((piece,idx)=>{
+  roomData.players.forEach((p,pi)=>{
+    p.pieces.forEach((piece,idx)=>{
       if(piece.done)return;
       const semi=((piece.pos%12)+12)%12;
       const a=(semi/12)*Math.PI*2-Math.PI/2;
@@ -502,7 +679,7 @@ function targetSemi(){
   const drawn=roomData?.drawn;
   if(!drawn)return null;
   let s=drawn.semi;
-  for(const item of (roomData.itemQueue||[]))s+=item==="#"?1:-1;
+  for(const item of roomData.itemQueue)s+=item==="#"?1:-1;
   return ((s%12)+12)%12;
 }
 
@@ -518,128 +695,141 @@ function highlightTarget(){
   if(t!==null)document.getElementById("key"+t)?.classList.add("target");
 }
 
+/* ---------- 게임 동작 ---------- */
+function myIndex(){
+  return (roomData?.players||[]).findIndex(p=>p.id===clientId);
+}
+
 async function drawNote(){
   if(!roomData)return;
-  const players=roomData.players||[];
-  const me=players.findIndex(p=>p.id===clientId);
-  if(me<0||me!==(roomData.current||0)||roomData.drawn)return;
-  await runTransaction(roomRef,current=>{
-    if(!current)return;
-    if(current.current!==me||current.drawn)return;
-    const card=NATURAL[Math.floor(Math.random()*NATURAL.length)];
-    current.drawn=card;
-    current.selectedPiece=(current.players[me].pieces||[]).findIndex(p=>!p.done);
-    if(current.selectedPiece<0)current.selectedPiece=0;
-    current.itemQueue=[];
-    current.logs=current.logs||[];
-    current.logs.push(`${current.players[me].name} → ${card.name} 카드`);
-    return current;
-  });
+  const me=myIndex();
+  if(me<0||me!==roomData.current||roomData.drawn)return;
+  try{
+    await withTimeout(tx(roomRef,current=>{
+      if(current.current!==me||current.drawn||current.winner)return;
+      const card=NATURAL[Math.floor(Math.random()*NATURAL.length)];
+      current.drawn=card;
+      current.itemQueue=[];
+      current.logs.push(`${current.players[me].name} → ${card.name} 카드`);
+      return current;
+    }));
+  }catch(e){
+    console.error(e);
+    alert(explainError(e));
+  }
 }
 
 async function toggleItem(type){
   if(!roomData?.drawn)return;
-  const players=roomData.players||[];
-  const me=players.findIndex(p=>p.id===clientId);
-  if(me<0||me!==(roomData.current||0))return;
-  await runTransaction(roomRef,current=>{
-    if(!current||current.current!==me||!current.drawn)return;
-    const p=current.players[me];
-    const count=type==="#"?(p.sharp||0):(p.flat||0);
-    if(count<=0)return current;
-    current.itemQueue=current.itemQueue||[];
-    const idx=current.itemQueue.indexOf(type);
-    if(idx>=0)current.itemQueue.splice(idx,1);
-    else current.itemQueue.push(type);
-    return current;
-  });
+  const me=myIndex();
+  if(me<0||me!==roomData.current)return;
+  try{
+    await withTimeout(tx(roomRef,current=>{
+      if(current.current!==me||!current.drawn)return;
+      const p=current.players[me];
+      const have=type==="#"?p.sharp:p.flat;
+      if(have<=0)return;
+      const used=current.itemQueue.filter(x=>x===type).length;
+      if(used>=have){
+        // 보유 수만큼 골랐다면 해제
+        current.itemQueue=current.itemQueue.filter(x=>x!==type);
+      }else{
+        current.itemQueue.push(type);
+      }
+      return current;
+    }));
+  }catch(e){
+    console.error(e);
+    alert(explainError(e));
+  }
 }
 
 function selectPiece(i){
   if(!roomData)return;
-  const players=roomData.players||[];
-  const me=players.findIndex(p=>p.id===clientId);
-  if(me<0||me!==(roomData.current||0))return;
-  if(players[me].pieces[i]?.done)return;
+  const me=myIndex();
+  if(me<0||me!==roomData.current)return;
+  if(roomData.players[me].pieces[i]?.done)return;
   selectedPiece=i;
   updateUI();
 }
 
 async function moveSelected(){
-  if(!roomData?.drawn)return;
-  const players=roomData.players||[];
-  const me=players.findIndex(p=>p.id===clientId);
-  if(me<0||me!==(roomData.current||0))return;
+  if(busy||!roomData?.drawn)return;
+  const me=myIndex();
+  if(me<0||me!==roomData.current)return;
+  const wantedPiece=selectedPiece; // 내가 고른 말을 서버 트랜잭션에 전달
+  busy=true;
+  try{
+    await withTimeout(tx(roomRef,current=>{
+      if(current.current!==me||!current.drawn||current.winner)return;
+      const p=current.players[me];
 
-  await runTransaction(roomRef,current=>{
-    if(!current||current.current!==me||!current.drawn||current.winner)return;
-    const p=current.players[me];
-    const piece=p.pieces[current.selectedPiece];
-    if(!piece||piece.done)return current;
+      let idx=wantedPiece;
+      if(!p.pieces[idx]||p.pieces[idx].done)idx=p.pieces.findIndex(x=>!x.done);
+      if(idx<0)return;
+      const piece=p.pieces[idx];
 
-    const queue=current.itemQueue||[];
-    for(const item of queue){
-      if(item==="#" && (p.sharp||0)<=0)return current;
-      if(item==="b" && (p.flat||0)<=0)return current;
-    }
+      const queue=current.itemQueue.slice();
+      const needSharp=queue.filter(x=>x==="#").length;
+      const needFlat=queue.filter(x=>x==="b").length;
+      if(needSharp>p.sharp||needFlat>p.flat)return;
 
-    let target=current.drawn.semi;
-    for(const item of queue)target+=item==="#"?1:-1;
-    target=((target%12)+12)%12;
+      let target=current.drawn.semi;
+      for(const item of queue)target+=item==="#"?1:-1;
+      target=((target%12)+12)%12;
 
-    const dest=nextDestination(piece.pos,target);
-    const passedDo=Math.floor(dest/12)>Math.floor(piece.pos/12);
+      const dest=nextDestination(piece.pos,target);
+      const passedDo=Math.floor(dest/12)>Math.floor(piece.pos/12);
 
-    if(passedDo){
-      p.sharp=(p.sharp||0)+1;
-      current.logs=current.logs||[];
-      current.logs.push(`${p.name}이(가) 도를 지나 아이템 카드 1장을 얻었습니다. (# +1)`);
-    }
-
-    piece.pos=dest;
-
-    for(const item of queue){
-      if(item==="#")p.sharp=Math.max(0,(p.sharp||0)-1);
-      else p.flat=Math.max(0,(p.flat||0)-1);
-    }
-
-    current.logs=current.logs||[];
-
-    current.players.forEach((op,oi)=>{
-      if(oi===me)return;
-      (op.pieces||[]).forEach((other,oj)=>{
-        if(other.done)return;
-        if(other.pos===piece.pos){
-          other.pos=Math.max(0,other.pos-12);
-          current.logs.push(`⚔️ ${p.name}이(가) ${op.name}의 말 ${oj+1}과 충돌! 상대 말이 1옥타브 뒤로 이동합니다.`);
-        }
-      });
-    });
-
-    if(piece.pos>=12){
-      piece.done=true;
-      piece.pos=12;
-      current.logs.push(`🏁 ${p.name}의 말 ${current.selectedPiece+1}이(가) 통과했습니다!`);
-      if(p.pieces.every(x=>x.done)){
-        current.winner=p.name;
-        current.phase="finished";
-        current.logs.push(`🎉 ${p.name}이(가) 네 개의 말을 모두 통과시켰습니다!`);
-        current.drawn=null;
-        current.itemQueue=[];
-        return current;
+      if(passedDo){
+        p.sharp+=1;
+        current.logs.push(`${p.name}이(가) 도를 지나 아이템 카드 1장을 얻었습니다. (# +1)`);
       }
-      const next=p.pieces.findIndex(x=>!x.done);
-      if(next>=0)current.selectedPiece=next;
-    }
 
-    if(queue.length)current.logs.push(`${queue.length}개의 아이템을 사용했습니다.`);
+      piece.pos=dest;
 
-    current.drawn=null;
-    current.itemQueue=[];
-    current.current=(current.current+1)%current.players.length;
-    current.logs.push(`${current.players[current.current].name}의 차례입니다.`);
-    return current;
-  });
+      p.sharp=Math.max(0,p.sharp-needSharp);
+      p.flat=Math.max(0,p.flat-needFlat);
+
+      current.players.forEach((op,oi)=>{
+        if(oi===me)return;
+        op.pieces.forEach((other,oj)=>{
+          if(other.done)return;
+          if(other.pos===piece.pos){
+            other.pos=Math.max(0,other.pos-12);
+            current.logs.push(`⚔️ ${p.name}이(가) ${op.name}의 말 ${oj+1}과 충돌! 상대 말이 1옥타브 뒤로 이동합니다.`);
+          }
+        });
+      });
+
+      if(piece.pos>=12){
+        piece.done=true;
+        piece.pos=12;
+        current.logs.push(`🏁 ${p.name}의 말 ${idx+1}이(가) 통과했습니다!`);
+        if(p.pieces.every(x=>x.done)){
+          current.winner=p.name;
+          current.phase="finished";
+          current.logs.push(`🎉 ${p.name}이(가) 네 개의 말을 모두 통과시켰습니다!`);
+          current.drawn=null;
+          current.itemQueue=[];
+          return current;
+        }
+      }
+
+      if(queue.length)current.logs.push(`${queue.length}개의 아이템을 사용했습니다.`);
+
+      current.drawn=null;
+      current.itemQueue=[];
+      current.current=(current.current+1)%current.players.length;
+      current.logs.push(`${current.players[current.current].name}의 차례입니다.`);
+      return current;
+    }));
+  }catch(e){
+    console.error(e);
+    alert(explainError(e));
+  }finally{
+    busy=false;
+  }
 }
 
 function showWinner(name){
@@ -647,19 +837,6 @@ function showWinner(name){
   document.getElementById("winText").textContent=`${name}이(가) 네 개의 말을 모두 통과시켰습니다!`;
   document.getElementById("modal").style.display="flex";
 }
-
-function showError(text){
-  const el=document.getElementById("error");
-  el.textContent=text;el.style.display="block";
-}
-function clearError(){document.getElementById("error").style.display="none"}
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
-}
-
-window.addEventListener("beforeunload",()=>{
-  // 방 데이터는 다른 참가자에게 게임 기록을 남기기 위해 자동 삭제하지 않습니다.
-});
 
 const params=new URLSearchParams(location.search);
 const autoCode=params.get("room");
