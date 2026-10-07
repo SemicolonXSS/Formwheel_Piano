@@ -343,7 +343,7 @@ setTimeout(function(){
 
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import {getDatabase, ref, get, set, onValue, runTransaction} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+import {getDatabase, ref, get, set, onValue, runTransaction, onDisconnect} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
 const firebaseConfig={
   apiKey:"AIzaSyBreTSe1m0-xlbF4aupnU5isRZCihR25IE",
@@ -702,6 +702,10 @@ async function joinRoom(){
 }
 
 function openListener(){
+ if(mode!=="solo"){
+   const presence=ref(db,`pianoRooms/${roomCode}/presence/${clientId}`);
+   onDisconnect(presence).set(false).then(()=>set(presence,true)).catch(()=>showError("연결 종료 감지 실패"));
+ }
   if(unsubscribe)unsubscribe();
   unsubscribe=onValue(roomRef,snap=>{
     roomData=normalize(snap.val());
@@ -709,6 +713,15 @@ function openListener(){
       alert("방이 삭제되었습니다.");
       location.reload();
       return;
+    }
+    if(mode!=="solo"&&(roomData.players||[]).some(p=>roomData.presence?.[p.id]===false)){
+      applyTx(current=>{
+        const gone=current.players.filter(p=>current.presence?.[p.id]===false);if(!gone.length)return;
+        if(current.phase==="lobby")current.players=current.players.filter(p=>current.presence?.[p.id]!==false);
+        else {current.winner="연결 종료 · 게임 종료";current.pending=null;}
+        if(!current.players.some(p=>p.id===current.hostId))current.hostId=current.players[0]?.id||"";
+        current.presence=current.presence||{};for(const p of gone)delete current.presence[p.id];return current;
+      }).catch(err=>showError(explainError(err)));return;
     }
     if(roomData.phase==="lobby")showLobby();
     else showGame();
@@ -1661,7 +1674,7 @@ async function respondShield(use,force){
       const v=pd.victims[0];
       if(!v)return;
       if(force){
-        if(current.current!==me||Date.now()-pd.at<20000)return;
+        if(me<0||Date.now()-pd.at<20000)return;
       }else if(v.p!==me){
         return;
       }
@@ -1715,7 +1728,7 @@ setInterval(()=>{
   const left=Math.max(0,20-Math.floor((Date.now()-pd.at)/1000));
   const el=document.getElementById("shieldTimer");
   if(el)el.textContent=`${left}초 안에 정하지 않으면 사용하지 않은 것으로 처리됩니다.`;
-  if(left===0&&myIndex()===roomData.current&&!forcing){
+  if(left===0&&myIndex()>=0&&!forcing){
     forcing=true;
     respondShield(false,true).finally(()=>{forcing=false;});
   }
@@ -1749,3 +1762,4 @@ if(autoCode)document.getElementById("joinCode").value=autoCode;
 </script>
 </body>
 </html>
+
