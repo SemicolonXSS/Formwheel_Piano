@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f7f8fc">
 <title>Formwheel_Piano</title>
-<link rel="stylesheet" href="./assets/styles.css?v=33142a2a7a15">
+<link rel="stylesheet" href="./assets/styles.css?v=tutorial-real-board-20261008">
 <link rel="stylesheet" href="https://semicolonxss.github.io/Formwheel/shared/formwheel-ui.css">
 <script defer src="https://semicolonxss.github.io/Formwheel/shared/formwheel-ui.js"></script>
 <link rel="icon" type="image/svg+xml" href="./assets/icon.svg">
@@ -16,9 +16,16 @@
 <body>
 <header class="header">
   <div class="logo" onclick="goHome()">Form<span class="wheel"></span>Wheel</div>
+<button class="tutorialLaunch" type="button" onclick="openTutorial()">🎓 튜토리얼</button>
 </header>
 
 <main class="wrap">
+<section id="tutorialBar" class="tutorialBar" hidden aria-label="게임 튜토리얼">
+  <h2 id="tutorialTitle"></h2><p id="tutorialText" aria-live="polite"></p>
+  <p class="tutorialNote">각 단계는 새 연습 상황으로 시작해요. 실제 판과 게임 버튼으로 해본 뒤 다음을 눌러주세요.</p>
+  <p id="tutorialStatus" role="status"></p>
+  <div class="tutorialActions"><button id="tutorialBack" type="button">이전</button><button id="tutorialNext" type="button">다음</button><button id="tutorialEnd" type="button">닫기</button></div>
+</section>
   <section id="setup" class="panel setup">
     <h1>🎹 Formwheel_Piano</h1>
     <div class="sub">Firebase 실시간 멀티플레이어 피아노 보드게임</div>
@@ -111,7 +118,7 @@
 
     <div id="log" class="log"></div>
   </section>
-<dialog id="tutorialDialog" style="width:min(600px,92vw);border:0;border-radius:20px;padding:24px"><h2>🎹 처음 배우기</h2><p id="tutorialText" aria-live="polite"></p><div id="tutorialBoard" style="display:flex;gap:5px;overflow:auto;padding:15px 0"></div><p id="tutorialStatus" role="status"></p><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="tutorialDraw">카드 뽑기</button><button id="tutorialSharp">♯ 아이템 사용</button><button id="tutorialMove">선택한 말 이동</button><button id="tutorialNext">다음</button><button onclick="document.getElementById('tutorialDialog').close()">닫기</button></div></dialog>
+
 </main>
 
 <!-- 게임 결과 -->
@@ -226,10 +233,11 @@
 </div>
 
 <!-- Firebase 라이브러리 로드 실패 감지용 -->
-<script src="./assets/app.js?v=bbdd6ab1d7cc"></script>
+<script src="./assets/app.js?v=tutorial-real-board-20261008"></script>
 
-<script type="module" src="./assets/app-2.js?v=c804f57ca5f2"></script>
+<script type="module" src="./assets/app-2.js?v=tutorial-real-board-20261008"></script>
 </body>
 </html>
+
 
 

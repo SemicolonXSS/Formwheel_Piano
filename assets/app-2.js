@@ -229,6 +229,7 @@ function initialState(players){
 }
 
 function drawCard(cfg){
+  if(mode==='tutorial')return tutorialStep===5?{name:'도',semi:0}:{name:'파',semi:5};
   const pool=cfg.cardRange==="all"?ALL_NOTES:NATURAL;
   return pool[Math.floor(Math.random()*pool.length)];
 }
@@ -382,7 +383,7 @@ function openListener(){
     if(roomData.phase==="lobby")showLobby();
     else showGame();
     updateUI();
-    if(roomData.winner)showWinner(roomData.winner);
+    if(roomData.winner&&mode!=="tutorial")showWinner(roomData.winner);
   },err=>{
     console.error(err);
     showError(explainError(err));
@@ -556,11 +557,12 @@ window.startSolo=function(){
 
 /* Firebase(온라인) 또는 로컬(솔로) 상태 변경을 하나의 인터페이스로 처리 */
 async function applyTx(fn){
-  if(mode==="solo"){
+  if(mode==="solo"||mode==="tutorial"){
     if(!roomData)return {committed:false};
     const result=fn(roomData);
     if(result===undefined)return {committed:false};
     roomData=normalize(result);
+    if(mode==="tutorial")roomData.current=0;
     renderLocal();
     return {committed:true};
   }
@@ -572,7 +574,7 @@ function renderLocal(){
   if(roomData.phase==="lobby")showLobby();
   else showGame();
   updateUI();
-  if(roomData.winner)showWinner(roomData.winner);
+  if(roomData.winner&&mode!=="tutorial")showWinner(roomData.winner);
   scheduleBotTurnIfNeeded();
 }
 
@@ -832,8 +834,8 @@ function showGame(){
   closeSettings();
   document.getElementById("setup").style.display="none";
   document.getElementById("game").style.display="block";
-  document.getElementById("gameRoomCode").textContent=mode==="solo"?"🤖 솔로":roomCode;
-  document.getElementById("copyCodeBtn").style.display=mode==="solo"?"none":"inline-block";
+  document.getElementById("gameRoomCode").textContent=mode==="tutorial"?"🎓 연습":mode==="solo"?"🤖 솔로":roomCode;
+  document.getElementById("copyCodeBtn").style.display=mode!=="online"?"none":"inline-block";
   if(boardTrack!==trackLen())buildBoard();
 }
 
@@ -972,6 +974,7 @@ function updateUI(){
   renderTokens();
   renderLogs();
   highlightTarget();
+  if(mode==="tutorial")renderTutorialGuide();
 }
 
 function renderLogs(){
@@ -1031,6 +1034,11 @@ function renderTokens(){
       t.className=`token ${COLORS[pi]}`;
       t.title=`${p.name} 말 ${idx+1}`;
       t.textContent=idx+1;
+      if(p.id===clientId){
+        t.setAttribute('role','button');t.tabIndex=0;t.setAttribute('aria-label',`${p.name} 말 ${idx+1} 선택`);
+        t.onclick=()=>selectPiece(idx);
+        t.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();selectPiece(idx);}};
+      }
       stack.appendChild(t);
     });
   });
@@ -1416,13 +1424,59 @@ const params=new URLSearchParams(location.search);
 const autoCode=params.get("room");
 if(autoCode)document.getElementById("joinCode").value=autoCode;
 
-let tutorial={step:0,pos:0,drawn:false,sharp:false};
-const tutorialLessons=['1. 카드 뽑기를 누르세요. 계이름 카드가 목적지를 정합니다.','2. 파(5) 카드입니다. 보드의 내 말을 선택한 뒤 이동하세요.','3. 다시 카드를 뽑고 ♯ 아이템을 누르세요. 파보다 반음 높은 파♯(6)로 바뀝니다.','4. ♯를 적용한 카드로 이동하세요. 보드에서 말을 먼저 선택합니다.','5. 도를 지나면 아이템을 얻습니다. 모든 말이 한 바퀴를 완주하면 승리합니다. 완료를 눌러 실전으로 돌아가세요.'];
-function openTutorial(){tutorial={step:0,pos:0,drawn:false,sharp:false,selected:false};renderTutorial();document.getElementById('tutorialDialog').showModal()}
-function renderTutorial(){const $=id=>document.getElementById(id);$('tutorialText').textContent=tutorialLessons[tutorial.step];$('tutorialBoard').replaceChildren();SEMI_NAMES.forEach((name,i)=>{const b=document.createElement('button');b.textContent=name+(tutorial.pos===i?' ●':'');b.style.minWidth='44px';b.setAttribute('aria-pressed',String(tutorial.selected&&tutorial.pos===i));b.onclick=()=>{if(tutorial.pos!==i)return;tutorial.selected=true;$('tutorialStatus').textContent='내 말 선택 완료';renderTutorial()};$('tutorialBoard').append(b)});$('tutorialDraw').disabled=![0,2].includes(tutorial.step)||tutorial.drawn;$('tutorialSharp').disabled=tutorial.step!==2||!tutorial.drawn;$('tutorialMove').disabled=![1,3].includes(tutorial.step)||!tutorial.selected;$('tutorialNext').disabled=tutorial.step<4;$('tutorialNext').textContent='완료'}
-document.getElementById('tutorialDraw').onclick=()=>{tutorial.drawn=true;if(tutorial.step===0)tutorial.step=1;document.getElementById('tutorialStatus').textContent='파 카드 뽑기 완료';renderTutorial()};
-document.getElementById('tutorialSharp').onclick=()=>{tutorial.sharp=true;tutorial.step=3;document.getElementById('tutorialStatus').textContent='파 → 파♯: 반음 위로 변경';renderTutorial()};
-document.getElementById('tutorialMove').onclick=()=>{if(!tutorial.selected)return;tutorial.pos=tutorial.sharp?6:5;tutorial.drawn=false;tutorial.selected=false;tutorial.step=tutorial.step===1?2:4;document.getElementById('tutorialStatus').textContent='이동 완료';renderTutorial()};
-document.getElementById('tutorialNext').onclick=()=>{try{localStorage.setItem('formwheel_piano_tutorial_done','1')}catch{}document.getElementById('tutorialDialog').close()};
-
-window.openTutorial=openTutorial;
+let tutorialStep=-1;
+const tutorialLessons=[
+  ['실제 피아노 판', '실전과 같은 원형 피아노 판이에요. 빨간색 1번이 내 말입니다. 판 위의 내 말이나 아래 말 선택 버튼을 눌러보세요. 각 단계는 새 연습 상황으로 시작해요.', '#board'],
+  ['계이름 카드', '계이름 카드 뽑기를 누르세요. 이번 연습에서는 파 카드가 나와요. 판에서 다음 파 칸이 강조되는 것을 확인하세요.', '#drawBtn'],
+  ['샤프와 플랫', '파 카드를 준비했어요. 아이템 카드의 #을 누르면 목적지가 파♯로, ♭를 누르면 미로 바뀌어요. 다시 누르면 선택을 해제해요. 판의 강조된 목적지를 비교해보세요.', '#itemRow'],
+  ['내 말 이동', '파 카드에 #을 선택해 두었어요. 판의 빨간 말이나 말 선택 버튼을 누르고 선택한 말 이동하기를 눌러 파♯로 이동해보세요.', '#moveBtn'],
+  ['상대 말과 충돌', '파 칸에 파란 상대 말이 있어요. 파 카드로 내 말을 이동하면 상대 말이 뒤로 밀려납니다. 판과 진행 기록에서 결과를 확인하세요.', '#key5'],
+  ['한 바퀴 완주', '내 말을 마지막 시 칸에 놓았어요. 도 카드를 뽑고 이동해 시작 칸을 통과해보세요. 도를 지나 아이템을 얻고, 설정된 개수만큼 말을 통과시키면 승리해요. 이번 연습은 말 1개 통과가 목표입니다.', '#drawBtn']
+];
+function openTutorial(){
+  if(roomData&&mode!=='tutorial'){alert('진행 중인 방이나 솔로 게임을 나간 뒤 튜토리얼을 열어주세요.');return;}
+  mode='tutorial';roomRef=null;roomCode='TUTORIAL';myName='나 · 연습';tutorialStep=0;loadTutorialStep();
+  document.getElementById('tutorialBar').scrollIntoView({block:'start',behavior:'smooth'});
+}
+function loadTutorialStep(){
+  const cfg=normalizeSettings({pieces:1,goal:1,octaves:2,collisionBack:1,passReward:1,itemsOn:{sharp:true,flat:true,reroll:false,shield:false,again:false},itemsStart:{sharp:1,flat:1}});
+  const human=makePlayer('나 · 연습'),other=makePlayer('상대 · 연습');other.id='tutorial-opponent';
+  human.pieces=[{pos:0,done:false}];other.pieces=[{pos:12,done:false}];human.items={...zeroItems(),sharp:1,flat:1};
+  roomData=normalize({...initialState([human,other]),settings:cfg,phase:'playing',logs:['🎓 실제 판으로 연습합니다. 다음을 누르면 새 연습 상황으로 바뀝니다.']});
+  selectedPiece=0;busy=false;
+  if(tutorialStep>=2&&tutorialStep<=4)roomData.drawn={name:'파',semi:5};
+  if(tutorialStep===3)roomData.itemQueue=['#'];
+  if(tutorialStep===4)roomData.players[1].pieces[0].pos=5;
+  if(tutorialStep===5)roomData.players[0].pieces[0].pos=23;
+  buildBoard();renderLocal();
+}
+function renderTutorialGuide(){
+  if(mode!=='tutorial'||tutorialStep<0)return;
+  const lesson=tutorialLessons[tutorialStep];
+  document.getElementById('tutorialBar').hidden=false;
+  document.getElementById('tutorialTitle').textContent=(tutorialStep+1)+' / '+tutorialLessons.length+' · '+lesson[0];
+  document.getElementById('tutorialText').textContent=lesson[1];
+  document.getElementById('tutorialBack').disabled=tutorialStep===0;
+  document.getElementById('tutorialNext').textContent=tutorialStep===tutorialLessons.length-1?'완료':'다음';
+  const me=roomData.players[0],piece=me.pieces[selectedPiece];
+  let status=roomData.winner?'🏁 통과 성공! 도를 지나 받은 아이템과 진행 기록을 확인하고 완료를 누르세요.':roomData.drawn?'🎴 '+roomData.drawn.name+' 카드 · 목적지 '+SEMI_NAMES[targetSemi()]+' · 내 말 '+piece.pos+'/24':'실제 게임 버튼으로 연습해보세요.';
+  if(tutorialStep===3&&piece.pos===6)status='✅ 파♯ 칸으로 이동했어요! 샤프 카드 1장이 사용됐어요.';
+  if(tutorialStep===4&&piece.pos===5)status='⚔️ 파 칸에 도착하고 상대 말이 시작 칸으로 밀려났어요!';
+  document.getElementById('tutorialStatus').textContent=status;
+  document.querySelectorAll('.tutorialTarget').forEach(el=>el.classList.remove('tutorialTarget'));
+  document.querySelector(lesson[2])?.classList.add('tutorialTarget');
+}
+function endTutorial(){
+  if(mode!=='tutorial')return;
+  tutorialStep=-1;roomData=null;roomCode='';roomRef=null;selectedPiece=0;busy=false;boardTrack=0;mode='online';
+  document.getElementById('tutorialBar').hidden=true;
+  document.querySelectorAll('.tutorialTarget').forEach(el=>el.classList.remove('tutorialTarget'));
+  document.getElementById('game').style.display='none';document.getElementById('setup').style.display='block';
+  document.getElementById('lobby').style.display='none';document.getElementById('roomMenu').style.display='block';
+  document.getElementById('shieldModal').style.display='none';
+}
+window.openTutorial=openTutorial;window.endTutorial=endTutorial;
+document.getElementById('tutorialBack').onclick=()=>{if(mode==='tutorial'&&tutorialStep>0){tutorialStep--;loadTutorialStep();}};
+document.getElementById('tutorialNext').onclick=()=>{if(mode!=='tutorial')return;if(tutorialStep===tutorialLessons.length-1)endTutorial();else{tutorialStep++;loadTutorialStep();}};
+document.getElementById('tutorialEnd').onclick=endTutorial;
+document.addEventListener('keydown',event=>{if(mode==='tutorial'&&event.key==='Escape')endTutorial();});
