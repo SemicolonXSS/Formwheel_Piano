@@ -1424,3 +1424,5 @@ document.getElementById('tutorialDraw').onclick=()=>{tutorial.drawn=true;if(tuto
 document.getElementById('tutorialSharp').onclick=()=>{tutorial.sharp=true;tutorial.step=3;document.getElementById('tutorialStatus').textContent='파 → 파♯: 반음 위로 변경';renderTutorial()};
 document.getElementById('tutorialMove').onclick=()=>{if(!tutorial.selected)return;tutorial.pos=tutorial.sharp?6:5;tutorial.drawn=false;tutorial.selected=false;tutorial.step=tutorial.step===1?2:4;document.getElementById('tutorialStatus').textContent='이동 완료';renderTutorial()};
 document.getElementById('tutorialNext').onclick=()=>{try{localStorage.setItem('formwheel_piano_tutorial_done','1')}catch{}document.getElementById('tutorialDialog').close()};
+
+window.openTutorial=openTutorial;
