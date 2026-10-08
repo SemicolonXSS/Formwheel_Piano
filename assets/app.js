@@ -8,3 +8,5 @@ setTimeout(function(){
     }
   }
 },5000);
+
+window.openTutorial=openTutorial;
