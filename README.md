@@ -1,6 +1,6 @@
 # Formwheel_Piano
 
-음계 카드를 활용해 플레이하는 FormWheel 보드게임.
+음계 카드 보드게임을 튜토리얼로 배우고 AI 솔로 또는 실시간 방에서 플레이.
 
 - 실행: https://semicolonxss.github.io/Formwheel_Piano/
 - 프로젝트 목록: https://semicolonxss.github.io/Formwheel/
