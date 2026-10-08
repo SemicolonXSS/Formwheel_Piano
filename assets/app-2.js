@@ -832,6 +832,7 @@ async function saveSettings(){
 /* ---------- 게임 화면 ---------- */
 function showGame(){
   closeSettings();
+  document.querySelector(".roomBar").style.display=mode==="tutorial"?"none":"flex";
   document.getElementById("setup").style.display="none";
   document.getElementById("game").style.display="block";
   document.getElementById("gameRoomCode").textContent=mode==="tutorial"?"🎓 연습":mode==="solo"?"🤖 솔로":roomCode;
@@ -1435,6 +1436,7 @@ const tutorialLessons=[
 ];
 function openTutorial(){
   if(roomData&&mode!=='tutorial'){alert('진행 중인 방이나 솔로 게임을 나간 뒤 튜토리얼을 열어주세요.');return;}
+  document.body.classList.add('tutorialMode');
   mode='tutorial';roomRef=null;roomCode='TUTORIAL';myName='나 · 연습';tutorialStep=0;loadTutorialStep();
   document.getElementById('tutorialBar').scrollIntoView({block:'start',behavior:'smooth'});
 }
@@ -1468,6 +1470,7 @@ function renderTutorialGuide(){
 }
 function endTutorial(){
   if(mode!=='tutorial')return;
+  document.body.classList.remove('tutorialMode');
   tutorialStep=-1;roomData=null;roomCode='';roomRef=null;selectedPiece=0;busy=false;boardTrack=0;mode='online';
   document.getElementById('tutorialBar').hidden=true;
   document.querySelectorAll('.tutorialTarget').forEach(el=>el.classList.remove('tutorialTarget'));
