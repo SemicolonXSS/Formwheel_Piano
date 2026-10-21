@@ -238,7 +238,19 @@
 
 <script type="module" src="./assets/app-2.js?v=tutorial-real-board-20261008-2"></script>
 <script type="module" src="https://semicolonxss.github.io/Formwheel/assets/live-presence.js?v=20261017-duration"></script>
-</body>
+<script>
+/* Secol Random 9 - piano board helper */
+document.addEventListener('DOMContentLoaded',()=>{
+const setup=document.getElementById('setup');if(!setup)return;
+const box=document.createElement('section');box.style.cssText='border:1px solid #aaa;border-radius:12px;padding:12px;margin-top:12px';
+box.innerHTML='<h3>🎹 세콜의 연습 카드</h3><button type="button" id="sr9note">🎵 랜덤 음 이름</button> <button type="button" id="sr9chord">🎼 랜덤 화음</button> <button type="button" id="sr9quiz">🧠 음계 퀴즈</button> <button type="button" id="sr9tip">💡 전략 팁</button><p id="sr9pianoStatus" role="status" style="font-weight:700"></p>';
+setup.appendChild(box);const out=document.getElementById('sr9pianoStatus'),notes=['도','레','미','파','솔','라','시'],pick=a=>a[Math.floor(Math.random()*a.length)];
+document.getElementById('sr9note').onclick=()=>out.textContent='오늘의 음: '+pick(notes);
+document.getElementById('sr9chord').onclick=()=>out.textContent='화음 연습: '+pick(['도·미·솔','파·라·도','솔·시·레','라·도·미']);
+document.getElementById('sr9quiz').onclick=()=>{const i=Math.floor(Math.random()*7);out.textContent=notes[i]+' 다음 음은? (정답: '+notes[(i+1)%7]+')'};
+document.getElementById('sr9tip').onclick=()=>out.textContent=pick(['이동하기 전 다음 턴의 경로를 살펴보세요.','보호 효과는 중요한 순간에 사용해보세요.','카드 규칙은 로비에서 확인할 수 있어요.','처음에는 솔로 모드에서 연습해 보세요.']);
+});
+</script></body>
 </html>
 
 
