@@ -34,12 +34,12 @@
     <div id="conn" style="font-size:13px;font-weight:800;color:#6b7280;margin:-12px 0 14px">⏳ 서버 연결 확인 중...</div>
 
     <div id="roomMenu">
-      <label>내 이름</label>
+      <label for="myName">내 이름</label>
       <input id="myName" maxlength="12" placeholder="닉네임">
 
       <button id="createBtn" class="primary" onclick="createRoom()">🎵 방 만들기</button>
 
-      <label>방 코드로 참가</label>
+      <label for="joinCode">방 코드로 참가</label>
       <input id="joinCode" maxlength="4" inputmode="numeric" placeholder="예: 1234">
       <button id="joinBtn" class="secondary" onclick="joinRoom()">🚪 방 참가</button>
 
@@ -74,7 +74,7 @@
     </div>
   </section>
 
-  <section id="game" class="game">
+  <section id="game" class="game"><h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">Piano 게임 및 튜토리얼</h1>
     <div class="roomBar">
       <div>방 코드 <b id="gameRoomCode">----</b></div>
       <button id="copyCodeBtn" class="smallBtn" onclick="copyRoomCode()">코드 복사</button>
@@ -146,13 +146,13 @@
 </div>
 
 <!-- 솔로 모드 설정 -->
-<div id="soloModal" class="modal">
+<div id="soloModal" class="modal" role="dialog" aria-modal="true" aria-label="솔로 모드 설정">
   <div class="modalBox settingsBox" style="max-width:420px">
     <h2>🤖 솔로 모드</h2>
     <p class="desc">컴퓨터를 상대로 혼자 연습해보세요. 인터넷 연결 없이도 진행됩니다.</p>
     <div class="setRow">
       <div class="lbl">컴퓨터 인원<small>함께 대전할 AI 수</small></div>
-      <select id="solo_count">
+      <select id="solo_count" aria-label="컴퓨터 플레이어 수">
         <option value="1">1명</option>
         <option value="2">2명</option>
         <option value="3">3명</option>
@@ -160,7 +160,7 @@
     </div>
     <div class="setRow">
       <div class="lbl">난이도<small>AI의 실력 수준</small></div>
-      <select id="solo_diff">
+      <select id="solo_diff" aria-label="컴퓨터 난이도">
         <option value="easy">쉬움</option>
         <option value="normal" selected>보통</option>
         <option value="hard">어려움</option>
@@ -184,38 +184,38 @@
     <div class="setSection">기본 규칙</div>
     <div class="setRow">
       <div class="lbl">말 개수<small>플레이어 한 명당 말 개수</small></div>
-      <select id="set_pieces" onchange="onPiecesChange()"></select>
+      <select id="set_pieces" onchange="onPiecesChange()" aria-label="플레이어당 말 수"></select>
     </div>
     <div class="setRow">
       <div class="lbl">승리 조건<small>몇 개를 통과시키면 이기는지</small></div>
-      <select id="set_goal"></select>
+      <select id="set_goal" aria-label="승리 목표"></select>
     </div>
     <div class="setRow">
       <div class="lbl">판 크기<small>한 바퀴 = 12칸 × 옥타브 수</small></div>
-      <select id="set_octaves"></select>
+      <select id="set_octaves" aria-label="게임판 옥타브 수"></select>
     </div>
     <div class="setRow">
       <div class="lbl">계이름 카드<small>뽑을 수 있는 음의 범위</small></div>
-      <select id="set_cards"></select>
+      <select id="set_cards" aria-label="카드 구성"></select>
     </div>
     <div class="setRow">
       <div class="lbl">충돌 페널티<small>상대 말이 있는 칸에 도착했을 때</small></div>
-      <select id="set_collision"></select>
+      <select id="set_collision" aria-label="말 충돌 규칙"></select>
     </div>
 
     <div class="setSection">아이템 카드</div>
     <div class="setRow">
       <div class="lbl">도를 지날 때 얻는 아이템<small>사용 중인 아이템 중 무작위로 지급</small></div>
-      <select id="set_reward"></select>
+      <select id="set_reward" aria-label="완주 보상"></select>
     </div>
     <div id="set_items"></div>
     <div class="setRow">
       <div class="lbl">🛡 방어 사용 방식<small>충돌했을 때 방어 카드를 쓰는 방법</small></div>
-      <select id="set_shield"></select>
+      <select id="set_shield" aria-label="보호막 규칙"></select>
     </div>
     <div class="setRow">
       <div class="lbl">이동당 아이템 사용 한도<small>한 번 이동할 때 쓸 수 있는 아이템 수</small></div>
-      <select id="set_limit"></select>
+      <select id="set_limit" aria-label="차례 제한 시간"></select>
     </div>
 
     <div class="setSection">✨ 특별 룰</div>
@@ -223,7 +223,7 @@
 
     <div class="setSection">📝 방 규칙 메모</div>
     <div class="desc">자유롭게 적으면 모든 참가자에게 보입니다. (게임에 자동 적용되지는 않습니다)</div>
-    <textarea id="set_memo" maxlength="200" placeholder="예: 충돌당하면 벌칙 노래 한 소절!" style="margin-top:8px"></textarea>
+    <textarea id="set_memo" maxlength="200" placeholder="예: 충돌당하면 벌칙 노래 한 소절!" style="margin-top:8px" aria-label="게임 메모"></textarea>
 
     <div class="setBtns">
       <button class="save" onclick="saveSettings()">💾 저장</button>
@@ -244,7 +244,7 @@
 document.addEventListener('DOMContentLoaded',()=>{
 const setup=document.getElementById('setup');if(!setup)return;
 const box=document.createElement('section');box.style.cssText='border:1px solid #aaa;border-radius:12px;padding:12px;margin-top:12px';
-box.innerHTML='<h3>🎹 세콜의 연습 카드</h3><button type="button" id="sr9note">🎵 랜덤 음 이름</button> <button type="button" id="sr9chord">🎼 랜덤 화음</button> <button type="button" id="sr9quiz">🧠 음계 퀴즈</button> <button type="button" id="sr9tip">💡 전략 팁</button><p id="sr9pianoStatus" role="status" style="font-weight:700"></p>';
+box.innerHTML='<h2>🎹 세콜의 연습 카드</h2><button type="button" id="sr9note">🎵 랜덤 음 이름</button> <button type="button" id="sr9chord">🎼 랜덤 화음</button> <button type="button" id="sr9quiz">🧠 음계 퀴즈</button> <button type="button" id="sr9tip">💡 전략 팁</button><p id="sr9pianoStatus" role="status" style="font-weight:700"></p>';
 setup.appendChild(box);const out=document.getElementById('sr9pianoStatus'),notes=['도','레','미','파','솔','라','시'],pick=a=>a[Math.floor(Math.random()*a.length)];
 document.getElementById('sr9note').onclick=()=>out.textContent='오늘의 음: '+pick(notes);
 document.getElementById('sr9chord').onclick=()=>out.textContent='화음 연습: '+pick(['도·미·솔','파·라·도','솔·시·레','라·도·미']);
